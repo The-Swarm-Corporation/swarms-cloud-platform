@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { AgentConfig } from '@/types/agent';
+import { apiFetch } from '@/lib/api/client-fetch';
 
 type State = {
   configs: AgentConfig[];
@@ -36,7 +37,7 @@ export function useAgentConfigsList() {
       const url = opts?.force
         ? '/api/agents/list?refresh=1'
         : '/api/agents/list';
-      const res = await fetch(url, { method: 'GET' });
+      const res = await apiFetch(url, { method: 'GET' });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error || `Request failed (${res.status})`);

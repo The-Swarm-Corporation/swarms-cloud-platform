@@ -96,10 +96,7 @@ export const metadata: Metadata = {
     images: [`${SITE.url}${SITE.ogImage}`],
   },
   icons: {
-    icon: [
-      { url: '/swarms-logo.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
+    icon: [{ url: '/swarms-logo.svg', type: 'image/svg+xml' }],
     shortcut: '/swarms-logo.svg',
     apple: '/swarms-logo.svg',
   },

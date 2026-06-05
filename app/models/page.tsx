@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { apiFetch } from '@/lib/api/client-fetch';
 import {
   Cpu,
   Loader2,
@@ -95,7 +96,7 @@ export default function ModelsPage() {
     setError(null);
     try {
       const url = refresh ? '/api/models?refresh=1' : '/api/models';
-      const res = await fetch(url, { method: 'GET' });
+      const res = await apiFetch(url, { method: 'GET' });
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

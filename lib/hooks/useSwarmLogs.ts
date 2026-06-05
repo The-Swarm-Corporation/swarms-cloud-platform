@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { apiFetch } from '@/lib/api/client-fetch';
 
 export type SwarmLogEntry = {
   id: string;
@@ -169,7 +170,7 @@ export function useSwarmLogs() {
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const url = opts?.force ? '/api/logs?refresh=1' : '/api/logs';
-      const res = await fetch(url, { method: 'GET' });
+      const res = await apiFetch(url, { method: 'GET' });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error || `Request failed (${res.status})`);

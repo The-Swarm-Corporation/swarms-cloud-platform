@@ -10,6 +10,7 @@ import {
   Calculator,
   Settings,
   AppWindow,
+  Package,
 } from 'lucide-react';
 
 export type AppCategory = 'operate' | 'catalog' | 'build' | 'tools' | 'account';
@@ -177,6 +178,33 @@ export const APPS: AppEntry[] = [
       'debate',
     ],
     icon: Network,
+    category: 'catalog',
+    status: 'live',
+  },
+  {
+    href: '/sdks',
+    label: 'SDKs',
+    description: 'Official client libraries and MCP server.',
+    longDescription:
+      'Build with the Swarms API in any language. Official, typed SDKs for Python, TypeScript, Go, Java, and C#, plus the MCP server for Claude Desktop and Cursor.',
+    keywords: [
+      'sdk',
+      'client library',
+      'python',
+      'typescript',
+      'javascript',
+      'go',
+      'java',
+      'csharp',
+      '.net',
+      'mcp',
+      'model context protocol',
+      'claude desktop',
+      'cursor',
+      'swarms-client',
+      'swarms-ts',
+    ],
+    icon: Package,
     category: 'catalog',
     status: 'live',
   },

@@ -23,6 +23,7 @@ import {
   Wand2,
   AppWindow,
   User,
+  Package,
 } from 'lucide-react';
 
 interface TabItem {
@@ -51,6 +52,7 @@ export function Navbar() {
     { href: '/history', label: 'History', icon: History, badge: totalExecutions },
     { href: '/models', label: 'Models', icon: Cpu },
     { href: '/swarms', label: 'Swarms', icon: Network },
+    { href: '/sdks', label: 'SDKs', icon: Package },
     { href: '/playground', label: 'Playground', icon: Sparkles },
     { href: '/prompts', label: 'Prompts', icon: Wand2 },
     { href: '/pricing', label: 'Pricing', icon: Calculator },

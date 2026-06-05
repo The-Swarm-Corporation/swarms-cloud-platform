@@ -21,6 +21,7 @@ import {
   Network,
   Sparkles,
   Wand2,
+  AppWindow,
 } from 'lucide-react';
 
 interface TabItem {
@@ -43,6 +44,7 @@ export function Navbar() {
 
   const tabs: TabItem[] = [
     { href: '/', label: 'Dashboard', icon: LayoutGrid },
+    { href: '/apps', label: 'Apps', icon: AppWindow },
     { href: '/workbench', label: 'Workbench', icon: Hammer },
     { href: '/agents', label: 'Agents', icon: Users, badge: agents.length },
     { href: '/history', label: 'History', icon: History, badge: totalExecutions },

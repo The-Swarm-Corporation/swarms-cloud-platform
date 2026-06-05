@@ -13,132 +13,15 @@ import {
   CornerDownLeft,
   ArrowDown,
   ArrowUp,
-  LayoutGrid,
-  Hammer,
-  Users,
-  History,
-  Settings,
-  Cpu,
-  Calculator,
-  Network,
-  Sparkles,
-  Wand2,
   X,
 } from 'lucide-react';
+import { APPS, APPS_DIRECTORY_ENTRY, type AppEntry } from '@/lib/apps-catalog';
 
-export type NavSearchPage = {
-  href: string;
-  label: string;
-  description: string;
-  keywords: string[];
-  icon: React.ComponentType<{ className?: string }>;
-};
+export type NavSearchPage = AppEntry;
 
 export const NAV_SEARCH_PAGES: NavSearchPage[] = [
-  {
-    href: '/',
-    label: 'Dashboard',
-    description: 'Overview, metrics, and rate-limit monitoring.',
-    keywords: ['home', 'overview', 'analytics', 'metrics', 'stats'],
-    icon: LayoutGrid,
-  },
-  {
-    href: '/workbench',
-    label: 'Workbench',
-    description: 'Build, configure, and run agents.',
-    keywords: ['build', 'create', 'configure', 'run', 'editor'],
-    icon: Hammer,
-  },
-  {
-    href: '/agents',
-    label: 'Agents',
-    description: 'Manage every agent in your workspace.',
-    keywords: ['list', 'manage', 'configurations'],
-    icon: Users,
-  },
-  {
-    href: '/history',
-    label: 'History',
-    description: 'Past executions and outputs.',
-    keywords: ['executions', 'logs', 'runs', 'past'],
-    icon: History,
-  },
-  {
-    href: '/models',
-    label: 'Models',
-    description: 'Browse available AI models for agents and swarms.',
-    keywords: ['llm', 'ai', 'catalog', 'providers', 'gpt', 'claude'],
-    icon: Cpu,
-  },
-  {
-    href: '/swarms',
-    label: 'Swarm types',
-    description: 'Multi-agent architectures supported by the Swarms API.',
-    keywords: [
-      'architecture',
-      'topology',
-      'hierarchical',
-      'sequential',
-      'concurrent',
-      'router',
-      'council',
-      'voting',
-      'debate',
-    ],
-    icon: Network,
-  },
-  {
-    href: '/playground',
-    label: 'Playground',
-    description: 'Compose multiple agents and run them as a swarm.',
-    keywords: [
-      'playground',
-      'compose',
-      'multi-agent',
-      'collaborate',
-      'run',
-      'experiment',
-    ],
-    icon: Sparkles,
-  },
-  {
-    href: '/prompts',
-    label: 'Prompt generator',
-    description:
-      'Auto-generate production-grade system prompts with a specialized agent.',
-    keywords: [
-      'prompt',
-      'prompt engineering',
-      'system prompt',
-      'generate prompt',
-      'prompt architect',
-      'meta prompt',
-      'sonnet',
-      'claude',
-    ],
-    icon: Wand2,
-  },
-  {
-    href: '/pricing',
-    label: 'Pricing calculator',
-    description: 'Estimate API costs by tokens and tools.',
-    keywords: [
-      'cost',
-      'tokens',
-      'estimate',
-      'price',
-      'calculator',
-      'billing',
-    ],
-    icon: Calculator,
-  },
-  {
-    href: '/settings',
-    label: 'Settings',
-    description: 'API keys, preferences, and workspace settings.',
-    keywords: ['api key', 'preferences', 'config', 'account'],
-    icon: Settings,
-  },
+  ...APPS,
+  APPS_DIRECTORY_ENTRY,
 ];
 
 function matchScore(page: NavSearchPage, query: string): number {

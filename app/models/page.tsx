@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { Pagination } from '@/components/ui/Pagination';
 import { apiFetch } from '@/lib/api/client-fetch';
 import {
   Cpu,
@@ -90,6 +91,8 @@ export default function ModelsPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const load = async (refresh = false) => {
     setLoading(true);
@@ -124,6 +127,20 @@ export default function ModelsPage() {
       (m) => m.id.toLowerCase().includes(q) || m.searchText.includes(q)
     );
   }, [models, query]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  const paginated = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(startIndex, startIndex + itemsPerPage);
+  }, [filtered, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, itemsPerPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const handleCopy = async (id: string) => {
     try {
@@ -211,16 +228,27 @@ export default function ModelsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {filtered.map((m, idx) => (
-                <ModelCard
-                  key={`${m.id}-${idx}`}
-                  entry={m}
-                  onCopy={handleCopy}
-                  copied={copiedId === m.id}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {paginated.map((m, idx) => (
+                  <ModelCard
+                    key={`${m.id}-${idx}`}
+                    entry={m}
+                    onCopy={handleCopy}
+                    copied={copiedId === m.id}
+                  />
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={filtered.length}
+                onItemsPerPageChange={setItemsPerPage}
+                itemsPerPageOptions={[10, 25, 50, 100, 200]}
+              />
+            </>
           )}
         </div>
       </main>

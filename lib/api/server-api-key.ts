@@ -39,11 +39,15 @@ export async function resolveApiKey(): Promise<string | null> {
             ),
           });
         } else {
+          // `is_deleted` is nullable with default false. Legacy rows can be
+          // NULL, and `eq(is_deleted, false)` excludes NULL because in SQL
+          // `NULL = false` is NULL, not true. Filter for "not true" instead
+          // so both false and null rows are kept.
           const { data, error: queryError } = await admin
             .from('swarms_cloud_api_keys')
             .select('key')
             .eq('user_id', user.id)
-            .eq('is_deleted', false)
+            .not('is_deleted', 'is', true)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();

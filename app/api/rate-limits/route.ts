@@ -1,43 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import SwarmsAPIClient from '@/lib/api/swarms-client';
 import { resolveApiKey } from '@/lib/api/server-api-key';
+import { createClient } from '@/lib/supabase/server';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
 
-const CACHE_TTL_MS = 20 * 1000;
-const CACHE_TTL_SECONDS = 20;
+const NO_STORE = 'private, no-store';
+const CACHE_TTL_MS = 20_000;
 
-type CacheEntry = {
-  data: unknown;
-  expiresAt: number;
-};
-
+type CacheEntry = { data: unknown; expiresAt: number };
 const cache = new Map<string, CacheEntry>();
 
 export async function GET(request: NextRequest) {
   try {
     const apiKey = await resolveApiKey();
-
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'No Swarms API key found. Sign in or create one in your Swarms account.' },
-        { status: 401 }
+        {
+          error:
+            'No Swarms API key found. Sign in or create one in your Swarms account.',
+        },
+        { status: 401, headers: { 'Cache-Control': NO_STORE } },
       );
     }
 
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const cacheKey = user?.id ?? `_env_${apiKey.slice(-8)}`;
+
     const force = request.nextUrl.searchParams.get('refresh') === '1';
-    const cacheKey = apiKey;
     const now = Date.now();
     const cached = cache.get(cacheKey);
 
     if (!force && cached && cached.expiresAt > now) {
       return NextResponse.json(cached.data, {
-        headers: {
-          'X-Cache': 'HIT',
-          'X-Cache-Expires-In': String(
-            Math.max(0, Math.floor((cached.expiresAt - now) / 1000))
-          ),
-          'Cache-Control': `private, max-age=${CACHE_TTL_SECONDS}`,
-        },
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': NO_STORE },
       });
     }
 
@@ -47,11 +45,7 @@ export async function GET(request: NextRequest) {
     cache.set(cacheKey, { data, expiresAt: now + CACHE_TTL_MS });
 
     return NextResponse.json(data, {
-      headers: {
-        'X-Cache': 'MISS',
-        'X-Cache-Expires-In': String(CACHE_TTL_SECONDS),
-        'Cache-Control': `private, max-age=${CACHE_TTL_SECONDS}`,
-      },
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': NO_STORE },
     });
   } catch (error) {
     return jsonErrorFromUnknown('api/rate-limits', error);

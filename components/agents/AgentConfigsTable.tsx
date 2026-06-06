@@ -31,7 +31,7 @@ export function AgentConfigsTable({ onSelectConfig }: AgentConfigsTableProps) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/agents/list');
+      const response = await fetch('/api/agents/list', { cache: 'no-store' });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

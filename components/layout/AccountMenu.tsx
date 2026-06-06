@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { signOutAction } from '@/lib/auth/actions';
+import { clearUserScopedStorage } from '@/lib/auth/client-storage';
 
 export function AccountMenu() {
   const pathname = usePathname();
@@ -40,6 +41,7 @@ export function AccountMenu() {
   const handleSignOut = () => {
     setOpen(false);
     startSignOut(async () => {
+      clearUserScopedStorage();
       await signOutAction();
     });
   };

@@ -7,6 +7,7 @@ import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useProfile, getInitials } from '@/lib/hooks/useProfile';
 import { signOutAction } from '@/lib/auth/actions';
+import { clearUserScopedStorage } from '@/lib/auth/client-storage';
 import {
   Palette,
   Wallet,
@@ -27,6 +28,7 @@ export default function SettingsPage() {
 
   const handleSignOut = () => {
     startSignOut(async () => {
+      clearUserScopedStorage();
       await signOutAction();
     });
   };

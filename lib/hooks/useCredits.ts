@@ -13,7 +13,7 @@ export function useCredits() {
     try {
       setIsLoading(true);
       const url = force ? '/api/credits?refresh=1' : '/api/credits';
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: 'no-store' });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));

@@ -18,7 +18,7 @@ const CACHE_DURATION = 20_000;
 let fetchPromise: Promise<RateLimitsResponse | null> | null = null;
 
 const fetchRateLimitsFromAPI = async (): Promise<RateLimitsResponse | null> => {
-  const response = await fetch('/api/rate-limits');
+  const response = await fetch('/api/rate-limits', { cache: 'no-store' });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to fetch rate limits');

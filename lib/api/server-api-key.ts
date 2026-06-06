@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Resolve the Swarms API key for the current request. Resolution order:
@@ -30,29 +31,38 @@ export async function resolveApiKey(): Promise<string | null> {
       }
 
       if (user) {
-        const { data, error: queryError } = await supabase
-          .from('swarms_cloud_api_keys')
-          .select('key')
-          .eq('user_id', user.id)
-          .eq('is_deleted', false)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        const admin = createAdminClient();
+        if (!admin) {
+          console.warn('[resolveApiKey] service role client unavailable', {
+            hasServiceRoleKey: Boolean(
+              process.env.SUPABASE_SERVICE_ROLE_KEY,
+            ),
+          });
+        } else {
+          const { data, error: queryError } = await admin
+            .from('swarms_cloud_api_keys')
+            .select('key')
+            .eq('user_id', user.id)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        if (queryError) {
-          console.error('[resolveApiKey] keys query error', {
-            userId: user.id,
-            code: queryError.code,
-            message: queryError.message,
-            details: queryError.details,
-          });
-        } else if (!data?.key) {
-          console.warn('[resolveApiKey] no key row for user', {
-            userId: user.id,
-          });
+          if (queryError) {
+            console.error('[resolveApiKey] keys query error', {
+              userId: user.id,
+              code: queryError.code,
+              message: queryError.message,
+              details: queryError.details,
+            });
+          } else if (!data?.key) {
+            console.warn('[resolveApiKey] no key row for user', {
+              userId: user.id,
+            });
+          }
+
+          if (data?.key) return data.key;
         }
-
-        if (data?.key) return data.key;
       } else {
         console.warn('[resolveApiKey] no authenticated user on request');
       }

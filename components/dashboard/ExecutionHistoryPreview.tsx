@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
+import type { SwarmLogEntry } from '@/lib/hooks/useSwarmLogs';
 import {
   CheckCircle2,
   XCircle,
@@ -12,8 +12,15 @@ import {
 
 const PREVIEW_LIMIT = 6;
 
-export function ExecutionHistoryPreview() {
-  const { logs, isLoading } = useSwarmLogs();
+interface ExecutionHistoryPreviewProps {
+  logs: SwarmLogEntry[];
+  isLoading?: boolean;
+}
+
+export function ExecutionHistoryPreview({
+  logs,
+  isLoading = false,
+}: ExecutionHistoryPreviewProps) {
   const recent = logs.slice(0, PREVIEW_LIMIT);
 
   return (
@@ -55,6 +62,7 @@ export function ExecutionHistoryPreview() {
               log.endpoint ||
               `Log ${log.id.slice(0, 8)}`;
             const tokens = log.usage?.total_tokens;
+            const cost = log.usage?.total_cost;
             return (
               <li key={log.id} className="px-1">
                 <Link
@@ -77,6 +85,11 @@ export function ExecutionHistoryPreview() {
                     )}
                   </span>
                   <span className="flex items-center gap-3 text-[11px] text-muted-foreground tabular-nums flex-shrink-0">
+                    {typeof cost === 'number' && (
+                      <span className="text-foreground font-medium">
+                        ${cost < 0.01 ? cost.toFixed(4) : cost.toFixed(2)}
+                      </span>
+                    )}
                     {typeof tokens === 'number' && (
                       <span className="hidden sm:inline">
                         {tokens.toLocaleString()} tok
@@ -106,7 +119,7 @@ function formatRelative(timestamp: string | null): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString(undefined, {
+  return new Date(timestamp).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   });

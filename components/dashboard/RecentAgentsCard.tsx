@@ -2,8 +2,8 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
-import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
+import type { SwarmLogEntry } from '@/lib/hooks/useSwarmLogs';
+import type { AgentConfig } from '@/types/agent';
 import { Bot, CheckCircle2, XCircle } from 'lucide-react';
 
 type RecentAgent = {
@@ -14,9 +14,17 @@ type RecentAgent = {
   model: string | null;
 };
 
-export function RecentAgentsCard() {
-  const { logs, isLoading: logsLoading } = useSwarmLogs();
-  const { configs } = useAgentConfigsList();
+interface RecentAgentsCardProps {
+  logs: SwarmLogEntry[];
+  configs: AgentConfig[];
+  isLoading?: boolean;
+}
+
+export function RecentAgentsCard({
+  logs,
+  configs,
+  isLoading: logsLoading = false,
+}: RecentAgentsCardProps) {
 
   const recent: RecentAgent[] = useMemo(() => {
     const modelByName = new Map(
@@ -149,7 +157,7 @@ function formatRelative(timestamp: number | null): string {
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d`;
-  return new Date(timestamp).toLocaleDateString(undefined, {
+  return new Date(timestamp).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   });

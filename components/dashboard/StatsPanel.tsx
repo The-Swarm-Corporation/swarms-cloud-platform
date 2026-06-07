@@ -2,9 +2,12 @@
 
 import React, { useMemo } from 'react';
 import { useAgentStore } from '@/lib/store/agent-store';
+import { useIsHydrated } from '@/lib/hooks/useIsHydrated';
 
 export function StatsPanel() {
-  const agents = useAgentStore((state) => state.agents);
+  const agentsFromStore = useAgentStore((state) => state.agents);
+  const hydrated = useIsHydrated();
+  const agents = hydrated ? agentsFromStore : [];
   const runningAgents = useMemo(
     () => agents.filter((agent) => agent.status === 'running'),
     [agents]

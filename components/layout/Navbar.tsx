@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useAgentStore } from '@/lib/store/agent-store';
 import { useRecentApps } from '@/lib/hooks/useRecentApps';
+import { useIsHydrated } from '@/lib/hooks/useIsHydrated';
 import { CreditBalance } from '@/components/dashboard/CreditBalance';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { NavSearch } from './NavSearch';
@@ -39,7 +40,11 @@ export function Navbar() {
   const pathname = usePathname();
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
-  const agents = useAgentStore((state) => state.agents);
+  const agentsFromStore = useAgentStore((state) => state.agents);
+  const hydrated = useIsHydrated();
+  // Empty on the server and on the very first client render to prevent
+  // hydration mismatches; populated by localStorage after mount.
+  const agents = hydrated ? agentsFromStore : [];
   const { recordVisit } = useRecentApps();
 
   React.useEffect(() => {

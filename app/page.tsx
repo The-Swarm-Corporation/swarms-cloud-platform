@@ -19,6 +19,8 @@ import {
   Calendar,
   Loader2,
   RefreshCw,
+  ArrowUpRight,
+  Sparkles,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -113,12 +115,12 @@ export default function DashboardPage() {
           {/* Recently visited & called */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-6">
             <RecentAppsCard />
-            <RecentAgentsCard />
+            <RecentAgentsCard logs={logs} configs={configs} />
           </div>
 
           {/* Recent executions preview */}
           <div className="mb-6">
-            <ExecutionHistoryPreview />
+            <ExecutionHistoryPreview logs={logs} />
           </div>
 
           {/* Premium upgrade */}
@@ -128,18 +130,41 @@ export default function DashboardPage() {
 
           {/* Rate limits */}
           <section className="mb-6">
-            <div className="flex items-end justify-between gap-3 mb-3">
+            <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
               <h2 className="text-base font-semibold tracking-tight text-foreground">
                 Rate limits
               </h2>
-              {rateLimits?.tier && (
-                <span className="inline-flex items-center gap-1.5 px-2 h-6 rounded-md border border-border bg-subtle text-xs">
-                  <span className="text-muted-foreground">Tier</span>
-                  <span className="font-medium text-foreground">
-                    {rateLimits.tier.toUpperCase()}
+              <div className="flex items-center gap-2 flex-wrap">
+                {rateLimits?.tier && (
+                  <span className="inline-flex items-center gap-1.5 px-2 h-6 rounded-md border border-border bg-subtle text-xs">
+                    <span className="text-muted-foreground">Tier</span>
+                    <span className="font-medium text-foreground">
+                      {rateLimits.tier.toUpperCase()}
+                    </span>
                   </span>
-                </span>
-              )}
+                )}
+                {isProTier(rateLimits?.tier) ? (
+                  <a
+                    href="/settings"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 h-6 px-2 rounded-md border border-border bg-card text-xs text-foreground hover:bg-muted transition-colors"
+                  >
+                    Manage billing
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <a
+                    href="https://swarms.world/platform/account?tab=subscription"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 h-6 px-2 rounded-md border border-accent/50 bg-accent/10 text-xs text-accent hover:bg-accent/20 transition-colors font-medium"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Upgrade to Pro
+                  </a>
+                )}
+              </div>
             </div>
 
             {isLoading && !rateLimits ? (
@@ -198,6 +223,12 @@ export default function DashboardPage() {
       </main>
     </div>
   );
+}
+
+function isProTier(tier: string | null | undefined): boolean {
+  if (!tier) return false;
+  const t = tier.toLowerCase();
+  return t === 'pro' || t === 'premium' || t === 'enterprise';
 }
 
 function ConfigStat({ label, value }: { label: string; value: number | string }) {

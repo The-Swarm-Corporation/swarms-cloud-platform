@@ -36,7 +36,10 @@ export const useUIStore = create<UIStore>()(
       },
 
       addToast: (toast) => {
-        const id = crypto.randomUUID();
+        const id =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const newToast: ToastNotification = { ...toast, id };
         set((state) => ({ toasts: [...state.toasts, newToast] }));
 

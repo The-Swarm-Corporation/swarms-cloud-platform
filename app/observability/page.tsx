@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   BarChart3,
   Calendar,
+  ChevronDown,
   Clock,
   DollarSign,
   Loader2,
@@ -225,33 +226,39 @@ export default function ObservabilityPage() {
                 {/* Granularity */}
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                  <select
-                    value={effectiveGranularity}
-                    onChange={(e) => setGranularity(e.target.value as Granularity)}
-                    className="rounded-md border border-border bg-subtle/50 px-2 py-1 text-xs text-foreground focus-ring"
-                  >
-                    {GRAN_OPTIONS.map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={effectiveGranularity}
+                      onChange={(e) => setGranularity(e.target.value as Granularity)}
+                      className="appearance-none rounded-md border border-border bg-card px-2.5 py-1.5 pr-7 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer focus-ring"
+                    >
+                      {GRAN_OPTIONS.map((g) => (
+                        <option key={g} value={g} className="bg-card text-foreground">
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                  </div>
                 </div>
 
                 {/* Group by */}
                 <div className="flex items-center gap-1.5">
                   <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
-                  <select
-                    value={groupBy}
-                    onChange={(e) => setGroupBy(e.target.value as GroupByDimension)}
-                    className="rounded-md border border-border bg-subtle/50 px-2 py-1 text-xs text-foreground focus-ring"
-                  >
-                    {GROUP_OPTIONS.map((g) => (
-                      <option key={g.value} value={g.value}>
-                        {g.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={groupBy}
+                      onChange={(e) => setGroupBy(e.target.value as GroupByDimension)}
+                      className="appearance-none rounded-md border border-border bg-card px-2.5 py-1.5 pr-7 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer focus-ring"
+                    >
+                      {GROUP_OPTIONS.map((g) => (
+                        <option key={g.value} value={g.value} className="bg-card text-foreground">
+                          {g.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                  </div>
                 </div>
               </div>
 

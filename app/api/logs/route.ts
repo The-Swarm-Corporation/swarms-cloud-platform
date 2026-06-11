@@ -23,11 +23,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const cacheKey = user?.id ?? `_env_${apiKey.slice(-8)}`;
+    let cacheKey = `_env_${apiKey.slice(-8)}`;
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) cacheKey = user.id;
+      } catch {
+        // Supabase not available; fall back to env key cache
+      }
+    }
 
     const force = request.nextUrl.searchParams.get('refresh') === '1';
     const now = Date.now();

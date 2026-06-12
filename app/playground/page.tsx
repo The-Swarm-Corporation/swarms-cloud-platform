@@ -33,7 +33,7 @@ import {
 function makeBlankAgent(index: number): SwarmAgentSpec {
   return {
     agent_name: `Agent ${index + 1}`,
-    model_name: 'gpt-4.1',
+    model_name: 'gpt-5.4',
     role: 'worker',
     system_prompt: '',
     temperature: 0.7,

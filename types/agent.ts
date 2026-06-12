@@ -76,6 +76,7 @@ export interface SavedAgentConfig {
 
 // Model options for the select dropdown
 export const MODEL_OPTIONS = [
+  { value: 'gpt-5.4', label: 'GPT-5.4' },
   { value: 'gpt-4o', label: 'GPT-4o' },
   { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
   { value: 'gpt-4.1', label: 'GPT-4.1' },

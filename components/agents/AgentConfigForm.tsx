@@ -27,7 +27,7 @@ export function AgentConfigForm({
     agent_name: initialConfig.agent_name || '',
     description: initialConfig.description || '',
     system_prompt: initialConfig.system_prompt || '',
-    model_name: initialConfig.model_name || 'gpt-4o-mini',
+    model_name: initialConfig.model_name || 'gpt-5.4',
     role: initialConfig.role || 'worker',
     max_loops: initialConfig.max_loops || 1,
     max_tokens: initialConfig.max_tokens || 8192,

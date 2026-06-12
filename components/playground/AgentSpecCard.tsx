@@ -50,7 +50,7 @@ export function AgentSpecCard({
           className="flex-1 min-w-0 bg-transparent text-sm text-foreground font-medium focus:outline-none placeholder:text-muted-foreground"
         />
         <span className="text-[11px] font-mono text-muted-foreground flex-shrink-0 hidden sm:inline">
-          {agent.model_name || 'gpt-4.1'}
+          {agent.model_name || 'gpt-5.4'}
         </span>
         <button
           type="button"
@@ -81,7 +81,7 @@ export function AgentSpecCard({
             <div className="flex flex-col gap-1.5">
               <label className={fieldLabel}>Model</label>
               <select
-                value={agent.model_name || 'gpt-4.1'}
+                value={agent.model_name || 'gpt-5.4'}
                 onChange={(e) => update({ model_name: e.target.value })}
                 className={inputBase}
               >

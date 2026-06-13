@@ -28,6 +28,7 @@ import {
   AppWindow,
   Package,
   KeyRound,
+  BookOpen,
 } from 'lucide-react';
 
 interface TabItem {
@@ -105,6 +106,24 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
+            <a
+              href="https://docs.swarms.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 h-7 px-2 rounded-sm border border-border bg-card text-xs text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Docs</span>
+            </a>
+            <a
+              href="https://status.swarms.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 h-7 px-2 rounded-sm border border-border bg-card text-xs text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>Status</span>
+            </a>
             <CreditBalance />
             <ThemeSwitcher compact />
             <AccountMenu />

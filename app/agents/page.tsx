@@ -8,6 +8,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { Pagination } from '@/components/ui/Pagination';
 import { Button } from '@/components/ui/Button';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
+import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
 import { Agent, AgentConfig } from '@/types/agent';
 import { downloadCsv, csvTimestamp } from '@/lib/utils/csv';
 import {
@@ -43,11 +44,25 @@ function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
 
 export default function AgentsPage() {
   const { configs, isLoading, error, refetch } = useAgentConfigsList();
+  const { logs } = useSwarmLogs();
   const [searchQuery, setSearchQuery] = useState('');
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+
+  const spendByAgentName = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const log of logs) {
+      const name = log.agentName;
+      if (!name) continue;
+      const cost = log.usage?.total_cost;
+      if (typeof cost === 'number' && Number.isFinite(cost)) {
+        map[name] = (map[name] ?? 0) + cost;
+      }
+    }
+    return map;
+  }, [logs]);
 
   const agents = useMemo(
     () => configs.map((c, i) => configToDisplayAgent(c, i)),
@@ -287,6 +302,7 @@ export default function AgentsPage() {
             <>
               <AgentTable
                 agents={paginatedAgents}
+                spendByAgentName={spendByAgentName}
                 onEditAgent={handleEditAgent}
                 onExecuteAgent={handleExecuteAgent}
                 showCreateButton={false}

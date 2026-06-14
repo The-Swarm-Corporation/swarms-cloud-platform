@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 
 interface AgentTableProps {
   agents?: Agent[];
+  spendByAgentName?: Record<string, number>;
   onCreateAgent?: () => void;
   onEditAgent?: (agent: Agent) => void;
   onExecuteAgent?: (agent: Agent) => void;
@@ -17,6 +18,7 @@ interface AgentTableProps {
 
 export function AgentTable({
   agents: providedAgents,
+  spendByAgentName,
   onCreateAgent,
   onEditAgent,
   onExecuteAgent,
@@ -114,7 +116,7 @@ export function AgentTable({
                   Loops
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                  Runs
+                  Spend
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
@@ -160,7 +162,15 @@ export function AgentTable({
                   </td>
                   <td className="px-4 py-3 text-right hidden md:table-cell">
                     <div className="font-mono text-xs text-muted-foreground tabular-nums">
-                      {agent.execution_history.length}
+                      {(() => {
+                        if (agent.execution_history.length > 0) {
+                          return agent.execution_history.length;
+                        }
+                        const name = agent.config.agent_name;
+                        const spend = spendByAgentName?.[name];
+                        if (spend === undefined || spend === 0) return '—';
+                        return `$${spend.toFixed(2)}`;
+                      })()}
                     </div>
                   </td>
                   <td className="px-3 py-2">

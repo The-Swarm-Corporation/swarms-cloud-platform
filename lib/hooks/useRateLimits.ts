@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RateLimitsResponse } from '@/types/api';
 import { useUIStore } from '@/lib/store/ui-store';
 
@@ -14,8 +14,11 @@ let rateLimitsCache: RateLimitsCache = {
   error: null,
 };
 
-const CACHE_DURATION = 20_000;
+const CACHE_DURATION = 60_000;
 let fetchPromise: Promise<RateLimitsResponse | null> | null = null;
+let activeInstances = 0;
+let intervalId: NodeJS.Timeout | null = null;
+const listeners = new Set<() => void>();
 
 const fetchRateLimitsFromAPI = async (): Promise<RateLimitsResponse | null> => {
   const response = await fetch('/api/rate-limits', { cache: 'no-store' });
@@ -26,7 +29,12 @@ const fetchRateLimitsFromAPI = async (): Promise<RateLimitsResponse | null> => {
   return response.json();
 };
 
-const updateCache = async (): Promise<void> => {
+const updateCache = async (force = false): Promise<void> => {
+  const now = Date.now();
+  if (!force && rateLimitsCache.data && now - rateLimitsCache.timestamp < CACHE_DURATION) {
+    return;
+  }
+
   if (fetchPromise) {
     try {
       const data = await fetchPromise;
@@ -54,71 +62,82 @@ const updateCache = async (): Promise<void> => {
   }
 };
 
+const notifyListeners = () => {
+  listeners.forEach((cb) => {
+    try {
+      cb();
+    } catch {
+      /* ignore */
+    }
+  });
+};
+
+const startSharedInterval = () => {
+  if (intervalId) return;
+  intervalId = setInterval(() => {
+    updateCache().then(notifyListeners);
+  }, CACHE_DURATION);
+};
+
+const stopSharedInterval = () => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+};
+
 export function useRateLimits() {
   const [rateLimits, setRateLimits] = useState<RateLimitsResponse | null>(
     rateLimitsCache.data,
   );
   const [isLoading, setIsLoading] = useState(!rateLimitsCache.data);
   const [error, setError] = useState<string | null>(rateLimitsCache.error);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitialMount = useRef(true);
 
   const getAddToast = () => useUIStore.getState().addToast;
 
-  const fetchRateLimits = async (showErrorToast = false) => {
-    const now = Date.now();
-    const cacheAge = now - rateLimitsCache.timestamp;
-
-    if (rateLimitsCache.data && cacheAge < CACHE_DURATION) {
-      setRateLimits(rateLimitsCache.data);
-      setError(null);
-      setIsLoading(false);
-      return;
-    }
-
-    if (isInitialMount.current || cacheAge >= CACHE_DURATION) {
-      setIsLoading(isInitialMount.current);
-      setError(null);
-
-      await updateCache();
-
-      setRateLimits(rateLimitsCache.data);
-      setError(rateLimitsCache.error);
-
-      if (rateLimitsCache.error && showErrorToast) {
-        getAddToast()({
-          type: 'error',
-          message: rateLimitsCache.error,
-          duration: 5000,
-        });
-      }
-
-      setIsLoading(false);
-      isInitialMount.current = false;
-    }
-  };
-
-  useEffect(() => {
-    fetchRateLimits(true);
-
-    intervalRef.current = setInterval(() => {
-      fetchRateLimits(false);
-    }, CACHE_DURATION);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const refetch = async () => {
-    setIsLoading(true);
-    rateLimitsCache.timestamp = 0;
-    await updateCache();
+  const syncState = useCallback(() => {
     setRateLimits(rateLimitsCache.data);
     setError(rateLimitsCache.error);
+    setIsLoading(false);
+  }, []);
+
+  const fetchRateLimits = useCallback(async (showErrorToast = false) => {
+    setIsLoading(true);
+    setError(null);
+    await updateCache();
+    syncState();
+
+    if (rateLimitsCache.error && showErrorToast) {
+      getAddToast()({
+        type: 'error',
+        message: rateLimitsCache.error,
+        duration: 5000,
+      });
+    }
+  }, [syncState]);
+
+  useEffect(() => {
+    activeInstances += 1;
+    fetchRateLimits(true);
+    startSharedInterval();
+
+    const listener = () => syncState();
+    listeners.add(listener);
+
+    return () => {
+      activeInstances -= 1;
+      listeners.delete(listener);
+      if (activeInstances <= 0) {
+        stopSharedInterval();
+      }
+    };
+  }, [fetchRateLimits, syncState]);
+
+  const refetch = useCallback(async () => {
+    setIsLoading(true);
+    rateLimitsCache.timestamp = 0;
+    await updateCache(true);
+    syncState();
 
     if (rateLimitsCache.error) {
       getAddToast()({
@@ -127,9 +146,7 @@ export function useRateLimits() {
         duration: 5000,
       });
     }
-
-    setIsLoading(false);
-  };
+  }, [syncState]);
 
   return {
     rateLimits,

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import SwarmsAPIClient from '@/lib/api/swarms-client';
 import { resolveApiKey } from '@/lib/api/server-api-key';
-import { createClient } from '@/lib/supabase/server';
+import { getUserId } from '@/lib/supabase/server';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
 
 const NO_STORE = 'private, no-store';
-const CACHE_TTL_MS = 30_000;
+const CACHE_TTL_MS = 120_000;
 
 type CacheEntry = { data: unknown; expiresAt: number };
 const cache = new Map<string, CacheEntry>();
@@ -23,11 +23,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const cacheKey = user?.id ?? `_env_${apiKey.slice(-8)}`;
+    const userId = await getUserId();
+    const cacheKey = userId ?? `_env_${apiKey.slice(-8)}`;
 
     const force = request.nextUrl.searchParams.get('refresh') === '1';
     const now = Date.now();

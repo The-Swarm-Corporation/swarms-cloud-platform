@@ -19,6 +19,17 @@ function generateApiKey(): string {
 
 export async function GET(_request: NextRequest) {
   try {
+    const hasSupabaseEnv = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+    if (!hasSupabaseEnv) {
+      return NextResponse.json(
+        { error: 'Supabase is not configured on this instance.' },
+        { status: 503, headers: { 'Cache-Control': NO_STORE } },
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -68,6 +79,17 @@ export async function GET(_request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const hasSupabaseEnv = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+    if (!hasSupabaseEnv) {
+      return NextResponse.json(
+        { error: 'Supabase is not configured on this instance.' },
+        { status: 503, headers: { 'Cache-Control': NO_STORE } },
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },

@@ -2,6 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Agent, AgentConfig, AgentStatus, AgentExecutionResponse, KanbanStatus } from '@/types/agent';
 
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 interface AgentStore {
   // State
   agents: Agent[];
@@ -28,7 +39,7 @@ export const useAgentStore = create<AgentStore>()(
       selectedAgentId: null,
 
       addAgent: (config) => {
-        const id = crypto.randomUUID();
+        const id = generateId();
         const newAgent: Agent = {
           id,
           config,

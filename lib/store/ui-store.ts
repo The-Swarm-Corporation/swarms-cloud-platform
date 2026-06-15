@@ -2,6 +2,18 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ViewMode, ToastNotification, Theme } from '@/types/ui';
 
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers / non-secure contexts
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 interface UIStore {
   viewMode: ViewMode;
   sidebarOpen: boolean;
@@ -36,7 +48,7 @@ export const useUIStore = create<UIStore>()(
       },
 
       addToast: (toast) => {
-        const id = crypto.randomUUID();
+        const id = generateId();
         const newToast: ToastNotification = { ...toast, id };
         set((state) => ({ toasts: [...state.toasts, newToast] }));
 

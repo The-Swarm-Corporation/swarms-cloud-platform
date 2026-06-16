@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
 
 const NO_STORE = 'private, no-store';
-const CACHE_TTL_MS = 20_000;
+const CACHE_TTL_MS = 90_000;
 
 type CacheEntry = { data: unknown; expiresAt: number };
 const cache = new Map<string, CacheEntry>();

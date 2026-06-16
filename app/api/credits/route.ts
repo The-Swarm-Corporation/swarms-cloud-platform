@@ -8,7 +8,7 @@ import { jsonErrorFromUnknown } from '@/lib/api/errors';
 // hold it. The route's own in-memory cache below provides upstream throttling.
 const NO_STORE = 'private, no-store';
 
-const CACHE_TTL_MS = 30_000;
+const CACHE_TTL_MS = 90_000;
 
 type CacheEntry = { data: unknown; expiresAt: number };
 const cache = new Map<string, CacheEntry>();

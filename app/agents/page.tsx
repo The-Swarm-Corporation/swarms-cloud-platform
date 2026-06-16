@@ -51,6 +51,14 @@ export default function AgentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
+  const agents = useMemo(
+    () => configs.map((c, i) => configToDisplayAgent(c, i)),
+    [configs],
+  );
+
+  // Aggregate per-agent USD spend from swarm logs. Only counts when the
+  // log has a finite numeric `usage.total_cost`; everything else is skipped
+  // silently so partial data never produces `NaN` in the spend cells.
   const spendByAgentName = useMemo(() => {
     const map: Record<string, number> = {};
     for (const log of logs) {
@@ -63,11 +71,6 @@ export default function AgentsPage() {
     }
     return map;
   }, [logs]);
-
-  const agents = useMemo(
-    () => configs.map((c, i) => configToDisplayAgent(c, i)),
-    [configs],
-  );
 
   // Distinct models actually present in the user's agents — drives the model
   // dropdown so we don't show models they don't use.

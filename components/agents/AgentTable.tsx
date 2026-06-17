@@ -9,6 +9,12 @@ import { Button } from '@/components/ui/Button';
 
 interface AgentTableProps {
   agents?: Agent[];
+  /** Optional map of agent_name -> aggregated USD spend from swarm logs.
+   *  Used by the /agents page (which reads from the Swarms API and never
+   *  has `execution_history`). When a row has execution_history > 0 we
+   *  fall back to that count instead — this component is also used by the
+   *  workbench where agents live in Zustand with real runs. */
+  spendByAgentName?: Record<string, number>;
   onCreateAgent?: () => void;
   onEditAgent?: (agent: Agent) => void;
   onExecuteAgent?: (agent: Agent) => void;
@@ -17,6 +23,7 @@ interface AgentTableProps {
 
 export function AgentTable({
   agents: providedAgents,
+  spendByAgentName,
   onCreateAgent,
   onEditAgent,
   onExecuteAgent,
@@ -114,7 +121,7 @@ export function AgentTable({
                   Loops
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                  Runs
+                  Spend
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
@@ -160,7 +167,17 @@ export function AgentTable({
                   </td>
                   <td className="px-4 py-3 text-right hidden md:table-cell">
                     <div className="font-mono text-xs text-muted-foreground tabular-nums">
-                      {agent.execution_history.length}
+                      {(() => {
+                        // Workbench path: row carries its own runs.
+                        if (agent.execution_history.length > 0) {
+                          return agent.execution_history.length;
+                        }
+                        // /agents page path: aggregate spend from swarm logs.
+                        const name = agent.config.agent_name;
+                        const spend = spendByAgentName?.[name];
+                        if (spend === undefined || spend === 0) return '—';
+                        return `$${spend.toFixed(2)}`;
+                      })()}
                     </div>
                   </td>
                   <td className="px-3 py-2">

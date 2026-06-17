@@ -3,12 +3,17 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
-import { AgentTable } from '@/components/agents/AgentTable';
+import { AgentTable, AgentSpendStats } from '@/components/agents/AgentTable';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Pagination } from '@/components/ui/Pagination';
 import { Button } from '@/components/ui/Button';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
 import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
+import {
+  DATE_PRESETS,
+  getActiveRange,
+  type DatePreset,
+} from '@/lib/utils/date-window';
 import { Agent, AgentConfig } from '@/types/agent';
 import { downloadCsv, csvTimestamp } from '@/lib/utils/csv';
 import {
@@ -28,6 +33,14 @@ const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: 'researcher', label: 'Researcher' },
 ];
 
+const SPEND_OPTIONS: { value: string; label: string }[] = [
+  { value: 'all', label: 'Any spend' },
+  { value: 'gt1', label: '> $1' },
+  { value: 'gt10', label: '> $10' },
+  { value: 'gt100', label: '> $100' },
+  { value: 'untouched', label: 'Untouched' },
+];
+
 function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
   const id =
     (config as unknown as { id?: string }).id ||
@@ -44,33 +57,21 @@ function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
 
 export default function AgentsPage() {
   const { configs, isLoading, error, refetch } = useAgentConfigsList();
-  const { logs } = useSwarmLogs();
+  const { logs, isLoading: logsLoading } = useSwarmLogs();
   const [searchQuery, setSearchQuery] = useState('');
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [spendFilter, setSpendFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [datePreset, setDatePreset] = useState<DatePreset>('all');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
 
   const agents = useMemo(
     () => configs.map((c, i) => configToDisplayAgent(c, i)),
     [configs],
   );
-
-  // Aggregate per-agent USD spend from swarm logs. Only counts when the
-  // log has a finite numeric `usage.total_cost`; everything else is skipped
-  // silently so partial data never produces `NaN` in the spend cells.
-  const spendByAgentName = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const log of logs) {
-      const name = log.agentName;
-      if (!name) continue;
-      const cost = log.usage?.total_cost;
-      if (typeof cost === 'number' && Number.isFinite(cost)) {
-        map[name] = (map[name] ?? 0) + cost;
-      }
-    }
-    return map;
-  }, [logs]);
 
   // Distinct models actually present in the user's agents — drives the model
   // dropdown so we don't show models they don't use.
@@ -82,6 +83,39 @@ export default function AgentsPage() {
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [agents]);
+
+  const activeRange = useMemo<{ from: number; to: number } | null>(
+    () => getActiveRange(datePreset, customFrom, customTo),
+    [datePreset, customFrom, customTo],
+  );
+
+  // Aggregate spend stats per agent from swarm logs, respecting the date window.
+  const agentStats = useMemo<Record<string, AgentSpendStats>>(() => {
+    const stats: Record<string, AgentSpendStats> = {};
+    for (const log of logs) {
+      if (!log.agentName) continue;
+      if (activeRange) {
+        const t = log.timestamp ? new Date(log.timestamp).getTime() : NaN;
+        if (!Number.isFinite(t)) continue;
+        if (t < activeRange.from || t > activeRange.to) continue;
+      }
+      const existing = stats[log.agentName] ?? {
+        runCount: 0,
+        totalSpend: 0,
+        lastRunAt: null,
+      };
+      existing.runCount += 1;
+      existing.totalSpend += log.usage?.total_cost ?? 0;
+      if (log.timestamp) {
+        const ts = new Date(log.timestamp).toISOString();
+        if (!existing.lastRunAt || ts > existing.lastRunAt) {
+          existing.lastRunAt = ts;
+        }
+      }
+      stats[log.agentName] = existing;
+    }
+    return stats;
+  }, [logs, activeRange]);
 
   // Token-based search: every whitespace-separated term must match somewhere.
   const filteredAgents = useMemo(() => {
@@ -98,6 +132,20 @@ export default function AgentsPage() {
         const role = (c.role ?? '').toLowerCase();
         if (role !== roleFilter.toLowerCase()) return false;
       }
+      const stats = agentStats[c.agent_name];
+      if (spendFilter !== 'all') {
+        const spend = stats?.totalSpend ?? 0;
+        const runs = stats?.runCount ?? 0;
+        if (spendFilter === 'untouched') {
+          if (runs > 0) return false;
+        } else if (spendFilter === 'gt1') {
+          if (spend <= 1) return false;
+        } else if (spendFilter === 'gt10') {
+          if (spend <= 10) return false;
+        } else if (spendFilter === 'gt100') {
+          if (spend <= 100) return false;
+        }
+      }
       if (terms.length === 0) return true;
 
       const haystack = [
@@ -113,7 +161,7 @@ export default function AgentsPage() {
 
       return terms.every((t) => haystack.includes(t));
     });
-  }, [agents, searchQuery, modelFilter, roleFilter]);
+  }, [agents, searchQuery, modelFilter, roleFilter, spendFilter, agentStats]);
 
   const paginatedAgents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -122,7 +170,7 @@ export default function AgentsPage() {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, modelFilter, roleFilter]);
+  }, [searchQuery, modelFilter, roleFilter, spendFilter, datePreset, customFrom, customTo]);
 
   const totalPages = Math.ceil(filteredAgents.length / itemsPerPage);
 
@@ -145,23 +193,41 @@ export default function AgentsPage() {
       'max_tokens',
       'auto_generate_prompt',
       'streaming_on',
+      'total_spend_usd',
+      'run_count',
     ];
-    const rows = filteredAgents.map((a) => [
-      a.config.agent_name ?? '',
-      a.config.description ?? '',
-      a.config.model_name ?? '',
-      a.config.role ?? '',
-      a.config.temperature ?? '',
-      a.config.max_loops ?? '',
-      a.config.max_tokens ?? '',
-      a.config.auto_generate_prompt ?? '',
-      a.config.streaming_on ?? '',
-    ]);
+    const rows = filteredAgents.map((a) => {
+      const stats = agentStats[a.config.agent_name];
+      return [
+        a.config.agent_name ?? '',
+        a.config.description ?? '',
+        a.config.model_name ?? '',
+        a.config.role ?? '',
+        a.config.temperature ?? '',
+        a.config.max_loops ?? '',
+        a.config.max_tokens ?? '',
+        a.config.auto_generate_prompt ?? '',
+        a.config.streaming_on ?? '',
+        stats?.totalSpend ?? 0,
+        stats?.runCount ?? 0,
+      ];
+    });
     downloadCsv(`agents_${csvTimestamp()}.csv`, headers, rows);
   };
 
+  const activePresetLabel =
+    DATE_PRESETS.find((p) => p.id === datePreset)?.label ?? 'All time';
+
   const hasActiveFilter =
-    !!searchQuery.trim() || modelFilter !== 'all' || roleFilter !== 'all';
+    !!searchQuery.trim() ||
+    modelFilter !== 'all' ||
+    roleFilter !== 'all' ||
+    spendFilter !== 'all' ||
+    datePreset !== 'all' ||
+    customFrom !== '' ||
+    customTo !== '';
+
+  const isPageLoading = isLoading || (agents.length === 0 && logsLoading);
 
   return (
     <div className="page-wrapper">
@@ -181,7 +247,7 @@ export default function AgentsPage() {
                 (<code className="text-foreground">/v1/agents/list</code>).
               </p>
             </div>
-            {!(isLoading && agents.length === 0) && agents.length > 0 && (
+            {!(isPageLoading && agents.length === 0) && agents.length > 0 && (
               <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap flex-shrink-0 sm:self-end sm:pb-1">
                 <span className="text-foreground font-medium">
                   {filteredAgents.length.toLocaleString()}
@@ -192,7 +258,7 @@ export default function AgentsPage() {
           </div>
 
           {/* Toolbar — only render when there's something to search */}
-          {!(isLoading && agents.length === 0) && agents.length > 0 && (
+          {!(isPageLoading && agents.length === 0) && agents.length > 0 && (
             <div className="mb-5 pb-4 border-b border-border flex flex-col gap-2.5">
               {/* Row 1 — Search + primary actions */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -237,7 +303,79 @@ export default function AgentsPage() {
                 </div>
               </div>
 
-              {/* Row 2 — Filters */}
+              {/* Row 2 — Date range + Filters */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div
+                  role="radiogroup"
+                  aria-label="Date range"
+                  className="inline-flex items-center gap-0.5 rounded-md border border-border bg-subtle p-0.5"
+                >
+                  {DATE_PRESETS.map((p) => {
+                    const active = datePreset === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setDatePreset(p.id)}
+                        className={`inline-flex items-center justify-center px-2.5 h-7 rounded text-xs font-medium transition-colors ${
+                          active
+                            ? 'bg-background text-foreground shadow-xs'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {datePreset === 'custom' && (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <label className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span className="uppercase tracking-wider">From</span>
+                      <input
+                        type="date"
+                        value={customFrom}
+                        max={customTo || undefined}
+                        onChange={(e) => setCustomFrom(e.target.value)}
+                        className="h-7 px-2 rounded-md border border-border bg-input text-foreground text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      />
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span className="uppercase tracking-wider">To</span>
+                      <input
+                        type="date"
+                        value={customTo}
+                        min={customFrom || undefined}
+                        onChange={(e) => setCustomTo(e.target.value)}
+                        className="h-7 px-2 rounded-md border border-border bg-input text-foreground text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      />
+                    </label>
+                    {(customFrom || customTo) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCustomFrom('');
+                          setCustomTo('');
+                        }}
+                        className="text-[11px] text-muted-foreground hover:text-foreground underline"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {datePreset !== 'custom' && (
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                    Spend window: {activePresetLabel}
+                  </span>
+                )}
+              </div>
+
+              {/* Row 3 — Filters */}
               <div className="flex flex-wrap items-center gap-2">
                 <FilterSelect
                   label="Model"
@@ -254,6 +392,12 @@ export default function AgentsPage() {
                   onChange={setRoleFilter}
                   options={ROLE_OPTIONS}
                 />
+                <FilterSelect
+                  label="Spend"
+                  value={spendFilter}
+                  onChange={setSpendFilter}
+                  options={SPEND_OPTIONS}
+                />
                 {hasActiveFilter && (
                   <button
                     type="button"
@@ -261,6 +405,10 @@ export default function AgentsPage() {
                       setSearchQuery('');
                       setModelFilter('all');
                       setRoleFilter('all');
+                      setSpendFilter('all');
+                      setDatePreset('all');
+                      setCustomFrom('');
+                      setCustomTo('');
                     }}
                     className="text-[11px] text-muted-foreground hover:text-foreground underline"
                   >
@@ -271,7 +419,7 @@ export default function AgentsPage() {
             </div>
           )}
 
-          {isLoading && agents.length === 0 ? (
+          {isPageLoading && agents.length === 0 ? (
             <div className="rounded-lg border border-border bg-card p-10 text-center">
               <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -305,7 +453,7 @@ export default function AgentsPage() {
             <>
               <AgentTable
                 agents={paginatedAgents}
-                spendByAgentName={spendByAgentName}
+                agentStats={agentStats}
                 onEditAgent={handleEditAgent}
                 onExecuteAgent={handleExecuteAgent}
                 showCreateButton={false}

@@ -4,28 +4,26 @@ import React, { useState } from 'react';
 import { useAgents } from '@/lib/hooks/useAgents';
 import { AgentStatusIndicator } from './AgentStatusIndicator';
 import { Agent } from '@/types/agent';
-import { Play, Edit, Trash2, Copy, Plus, ChevronsUpDown, Users } from 'lucide-react';
+import { Copy, Plus, ChevronsUpDown, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useUIStore } from '@/lib/store/ui-store';
 
 interface AgentTableProps {
   agents?: Agent[];
   onCreateAgent?: () => void;
-  onEditAgent?: (agent: Agent) => void;
-  onExecuteAgent?: (agent: Agent) => void;
   showCreateButton?: boolean;
 }
 
 export function AgentTable({
   agents: providedAgents,
   onCreateAgent,
-  onEditAgent,
-  onExecuteAgent,
   showCreateButton = true,
 }: AgentTableProps) {
-  const { agents: hookAgents, removeAgent, duplicateAgent } = useAgents();
+  const { agents: hookAgents } = useAgents();
   const agents = providedAgents ?? hookAgents;
   const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'status'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const addToast = useUIStore((state) => state.addToast);
 
   const sortedAgents = [...agents].sort((a, b) => {
     let comparison = 0;
@@ -45,6 +43,32 @@ export function AgentTable({
     } else {
       setSortBy(column);
       setSortOrder('asc');
+    }
+  };
+
+  const handleCopyMetadata = async (agent: Agent) => {
+    try {
+      const response = await fetch('/api/agents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ search: agent.config.agent_name, limit: 1 }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch agent metadata');
+      }
+      const metadata = Array.isArray(data) && data.length > 0 ? data[0] : null;
+      if (!metadata) {
+        throw new Error('Agent not found in marketplace');
+      }
+      await navigator.clipboard.writeText(JSON.stringify(metadata, null, 2));
+      addToast({ type: 'success', message: 'Agent metadata copied to clipboard', duration: 2000 });
+    } catch (err) {
+      addToast({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to copy metadata',
+        duration: 3000,
+      });
     }
   };
 
@@ -167,35 +191,11 @@ export function AgentTable({
                     <div className="flex items-center justify-end gap-0.5">
                       <button
                         type="button"
-                        onClick={() => onExecuteAgent?.(agent)}
+                        onClick={() => handleCopyMetadata(agent)}
                         className={actionBtn}
-                        title="Execute"
-                      >
-                        <Play className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onEditAgent?.(agent)}
-                        className={actionBtn}
-                        title="Edit"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => duplicateAgent(agent.id)}
-                        className={actionBtn}
-                        title="Duplicate"
+                        title="Copy metadata"
                       >
                         <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeAgent(agent.id)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

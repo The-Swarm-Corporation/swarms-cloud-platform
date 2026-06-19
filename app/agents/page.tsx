@@ -108,14 +108,6 @@ export default function AgentsPage() {
 
   const totalPages = Math.ceil(filteredAgents.length / itemsPerPage);
 
-  const handleEditAgent = (agent: Agent) => {
-    console.log('Edit agent:', agent);
-  };
-
-  const handleExecuteAgent = (agent: Agent) => {
-    console.log('Execute agent:', agent);
-  };
-
   const handleExportCsv = () => {
     const headers = [
       'agent_name',
@@ -287,8 +279,6 @@ export default function AgentsPage() {
             <>
               <AgentTable
                 agents={paginatedAgents}
-                onEditAgent={handleEditAgent}
-                onExecuteAgent={handleExecuteAgent}
                 showCreateButton={false}
               />
               {totalPages > 1 && (

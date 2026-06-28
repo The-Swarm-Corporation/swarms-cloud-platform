@@ -2,7 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import SwarmsAPIClient from '@/lib/api/swarms-client';
 import { resolveApiKey } from '@/lib/api/server-api-key';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
-import type { AgentConfig } from '@/types/agent';
+import { MODEL_OPTIONS, type AgentConfig } from '@/types/agent';
+
+const DEFAULT_MODEL = 'claude-sonnet-4-6';
+
+// Models the user may pick for the Prompt Architect agent. The default sits
+// alongside the shared agent-config options so the allowlist stays in sync.
+const ALLOWED_MODELS = new Set<string>([
+  DEFAULT_MODEL,
+  ...MODEL_OPTIONS.map((m) => m.value),
+]);
+
+function resolveModel(requested: unknown): string {
+  return typeof requested === 'string' && ALLOWED_MODELS.has(requested)
+    ? requested
+    : DEFAULT_MODEL;
+}
 
 const PROMPT_ARCHITECT_SYSTEM_PROMPT = `You are Prompt Architect — a senior prompt engineer specializing in production-grade system prompts for AI agents. Your only job is to translate a high-level description of a desired agent into a complete, deployable system prompt.
 
@@ -29,19 +44,21 @@ QUALITY BAR
 
 Every prompt you produce must be drop-in usable in a production agent runtime. A skilled prompt engineer reading your output should not need to edit it before deployment. Prefer specificity over flexibility; prefer one strong instruction over three weak ones.`;
 
-const PROMPT_ARCHITECT_CONFIG: AgentConfig = {
-  agent_name: 'Prompt Architect',
-  description:
-    'Designs production-grade system prompts for AI agents from a high-level brief.',
-  system_prompt: PROMPT_ARCHITECT_SYSTEM_PROMPT,
-  model_name: 'claude-sonnet-4-6',
-  role: 'analyst',
-  max_loops: 1,
-  max_tokens: 4000,
-  temperature: 0.4,
-  auto_generate_prompt: false,
-  streaming_on: false,
-};
+function buildArchitectConfig(model: string): AgentConfig {
+  return {
+    agent_name: 'Prompt Architect',
+    description:
+      'Designs production-grade system prompts for AI agents from a high-level brief.',
+    system_prompt: PROMPT_ARCHITECT_SYSTEM_PROMPT,
+    model_name: model,
+    role: 'analyst',
+    max_loops: 1,
+    max_tokens: 4000,
+    temperature: 0.4,
+    auto_generate_prompt: false,
+    streaming_on: false,
+  };
+}
 
 type Body = {
   goal?: string;
@@ -49,6 +66,7 @@ type Body = {
   audience?: string;
   constraints?: string;
   outputFormat?: string;
+  model?: string;
 };
 
 function buildTask(body: Body): string {
@@ -131,14 +149,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const model = resolveModel(body.model);
     const client = new SwarmsAPIClient(apiKey, process.env.SWARMS_API_BASE_URL);
-    const result = await client.executeAgent(PROMPT_ARCHITECT_CONFIG, task);
+    const result = await client.executeAgent(buildArchitectConfig(model), task);
 
     return NextResponse.json({
       prompt: extractText(result.outputs),
       job_id: result.job_id,
       usage: result.usage ?? null,
       timestamp: result.timestamp,
+      model,
     });
   } catch (error) {
     return jsonErrorFromUnknown('api/prompt-generator', error);

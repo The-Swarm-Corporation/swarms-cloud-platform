@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/api/client-fetch';
+import { MODEL_OPTIONS } from '@/types/agent';
 import {
   Wand2,
   Sparkles,
@@ -15,6 +16,19 @@ import {
   RotateCw,
 } from 'lucide-react';
 
+// Model choices for the Prompt Architect agent. The recommended default is
+// listed first; the rest mirror the shared agent-config model list.
+const PROMPT_MODEL_OPTIONS = [
+  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommended)' },
+  ...MODEL_OPTIONS,
+] as const;
+
+const DEFAULT_MODEL = 'claude-sonnet-4-6';
+
+function modelLabel(value: string): string {
+  return PROMPT_MODEL_OPTIONS.find((m) => m.value === value)?.label ?? value;
+}
+
 type HistoryEntry = {
   id: string;
   timestamp: string;
@@ -23,6 +37,7 @@ type HistoryEntry = {
   audience: string;
   constraints: string;
   outputFormat: string;
+  model: string;
   prompt: string;
   usage: {
     input_tokens?: number;
@@ -62,6 +77,7 @@ export default function PromptGeneratorPage() {
   const [audience, setAudience] = useState('');
   const [constraints, setConstraints] = useState('');
   const [outputFormat, setOutputFormat] = useState('');
+  const [model, setModel] = useState<string>(DEFAULT_MODEL);
 
   const [prompt, setPrompt] = useState('');
   const [usage, setUsage] = useState<HistoryEntry['usage']>(null);
@@ -94,6 +110,7 @@ export default function PromptGeneratorPage() {
           audience: audience.trim(),
           constraints: constraints.trim(),
           outputFormat: outputFormat.trim(),
+          model,
         }),
       });
 
@@ -117,6 +134,7 @@ export default function PromptGeneratorPage() {
         audience: audience.trim(),
         constraints: constraints.trim(),
         outputFormat: outputFormat.trim(),
+        model: (data?.model as string) || model,
         prompt: generated,
         usage: data?.usage ?? null,
       };
@@ -147,6 +165,7 @@ export default function PromptGeneratorPage() {
     setAudience(entry.audience);
     setConstraints(entry.constraints);
     setOutputFormat(entry.outputFormat);
+    if (entry.model) setModel(entry.model);
     setPrompt(entry.prompt);
     setUsage(entry.usage);
     setError(null);
@@ -177,9 +196,9 @@ export default function PromptGeneratorPage() {
             </h1>
             <p className="text-sm text-muted-foreground max-w-3xl">
               Auto-generate production-grade system prompts for AI agents. Powered
-              by <span className="text-foreground font-mono">claude-sonnet-4-6</span>{' '}
-              and a specialized <span className="text-foreground">Prompt Architect</span>{' '}
-              agent.
+              by a specialized <span className="text-foreground">Prompt Architect</span>{' '}
+              agent running on{' '}
+              <span className="text-foreground font-mono">{model}</span>.
             </p>
           </div>
 
@@ -248,6 +267,20 @@ export default function PromptGeneratorPage() {
                   />
                 </Field>
 
+                <Field label="Model" hint="The model the Prompt Architect agent runs on.">
+                  <select
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    className="w-full h-9 px-3 rounded-md border border-border bg-input text-foreground text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    {PROMPT_MODEL_OPTIONS.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
                 <button
                   type="button"
                   onClick={handleGenerate}
@@ -304,8 +337,18 @@ export default function PromptGeneratorPage() {
                             <div className="text-xs text-foreground truncate">
                               {entry.goal || 'Untitled prompt'}
                             </div>
-                            <div className="text-[10px] text-muted-foreground tabular-nums mt-0.5">
-                              {new Date(entry.timestamp).toLocaleString()}
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] text-muted-foreground tabular-nums">
+                                {new Date(entry.timestamp).toLocaleString()}
+                              </span>
+                              {entry.model && (
+                                <span className="px-1 rounded-sm bg-subtle border border-border text-[9px] font-mono text-muted-foreground">
+                                  {modelLabel(entry.model).replace(
+                                    ' (recommended)',
+                                    ''
+                                  )}
+                                </span>
+                              )}
                             </div>
                           </button>
                           <button
@@ -380,7 +423,7 @@ export default function PromptGeneratorPage() {
                       Prompt Architect is drafting…
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Typically 5–15 seconds with claude-sonnet-4-6.
+                      Typically 5–15 seconds with {model}.
                     </p>
                   </div>
                 ) : error ? (

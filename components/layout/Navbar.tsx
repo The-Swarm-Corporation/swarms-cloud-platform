@@ -31,6 +31,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface TabItem {
@@ -108,6 +109,7 @@ export function Navbar() {
     { href: '/pricing', label: 'Pricing', icon: Calculator },
     { href: '/api-keys', label: 'API Keys', icon: KeyRound },
     { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/audit-log', label: 'Audit', icon: ShieldCheck },
   ];
 
   return (

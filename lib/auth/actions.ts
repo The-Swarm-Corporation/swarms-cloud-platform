@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import type { AuthError, Provider } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { logAuditEvent } from '@/lib/audit/log-audit-event';
 
 function getSiteOrigin(headerOrigin: string | null): string {
   if (headerOrigin) return headerOrigin;
@@ -43,6 +44,16 @@ function safeAuthError(context: string, error: AuthError): string {
   return GENERIC_AUTH_MESSAGE;
 }
 
+async function getRequestContext() {
+  const reqHeaders = await headers();
+  const ip =
+    reqHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    reqHeaders.get('x-real-ip') ??
+    null;
+  const userAgent = reqHeaders.get('user-agent') ?? null;
+  return { ip, userAgent };
+}
+
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
 export async function signInWithPasswordAction(
@@ -60,6 +71,19 @@ export async function signInWithPasswordAction(
 
   if (error) {
     return { ok: false, error: safeAuthError('auth/signin', error) };
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { ip, userAgent } = await getRequestContext();
+    logAuditEvent({
+      action: 'auth.signed_in',
+      targetKind: 'session',
+      actorUserId: user.id,
+      actorKind: 'user',
+      ipAddress: ip ?? undefined,
+      userAgent: userAgent ?? undefined,
+    });
   }
 
   revalidatePath('/', 'layout');
@@ -140,6 +164,18 @@ export async function signInWithOAuthAction(
 
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { ip, userAgent } = await getRequestContext();
+    logAuditEvent({
+      action: 'auth.signed_out',
+      targetKind: 'session',
+      actorUserId: user.id,
+      actorKind: 'user',
+      ipAddress: ip ?? undefined,
+      userAgent: userAgent ?? undefined,
+    });
+  }
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
   redirect('/login');

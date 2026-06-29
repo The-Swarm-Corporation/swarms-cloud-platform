@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
+import { logAuditEvent } from '@/lib/audit/log-audit-event';
 
 const NO_STORE = 'private, no-store';
 
@@ -36,7 +37,7 @@ export async function DELETE(
     // another user's key by guessing ids.
     const { data: existing, error: lookupError } = await admin
       .from('swarms_cloud_api_keys')
-      .select('id')
+      .select('id, name')
       .eq('id', id)
       .eq('user_id', user.id)
       .not('is_deleted', 'is', true)
@@ -57,6 +58,14 @@ export async function DELETE(
       .eq('user_id', user.id);
 
     if (updateError) throw updateError;
+
+    logAuditEvent({
+      action: 'api_key.deleted',
+      targetKind: 'api_key',
+      targetId: id,
+      targetLabel: existing?.name,
+      actorUserId: user.id,
+    });
 
     return NextResponse.json(
       { success: true },

@@ -2,6 +2,27 @@ import { useMemo } from 'react';
 import { useAgentStore } from '@/lib/store/agent-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { AgentConfig } from '@/types/agent';
+import { apiFetch } from '@/lib/api/client-fetch';
+
+async function logAgentAudit(
+  action: 'agent.created' | 'agent.updated' | 'agent.deleted',
+  targetId: string,
+  targetLabel?: string
+) {
+  try {
+    await apiFetch('/api/audit', {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        targetKind: 'agent',
+        targetId,
+        targetLabel,
+      }),
+    });
+  } catch {
+    // non-blocking
+  }
+}
 
 export function useAgents() {
   const agents = useAgentStore((state) => state.agents);
@@ -19,6 +40,7 @@ export function useAgents() {
   const createAgent = (config: AgentConfig) => {
     try {
       const id = addAgent(config);
+      logAgentAudit('agent.created', id, config.agent_name);
       addToast({
         type: 'success',
         message: `Agent "${config.agent_name}" created successfully`,
@@ -38,10 +60,12 @@ export function useAgents() {
   const removeAgent = (id: string) => {
     const agent = getAgentById(id);
     if (agent) {
+      const name = agent.config.agent_name;
       deleteAgent(id);
+      logAgentAudit('agent.deleted', id, name);
       addToast({
         type: 'success',
-        message: `Agent "${agent.config.agent_name}" deleted`,
+        message: `Agent "${name}" deleted`,
         duration: 3000,
       });
     }

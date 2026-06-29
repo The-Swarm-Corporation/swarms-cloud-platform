@@ -14,6 +14,7 @@ import {
   Activity,
   KeyRound,
   BookOpen,
+  Workflow,
 } from 'lucide-react';
 
 export type AppCategory =
@@ -181,6 +182,29 @@ export const APPS: AppEntry[] = [
     icon: Sparkles,
     category: 'build',
     status: 'live',
+  },
+  {
+    href: '/workflow-builder',
+    label: 'Workflow Builder',
+    description: 'Visually build flows of agents on a canvas.',
+    longDescription:
+      'Drag agents onto a canvas, connect them into a directed flow, then run the workflow on the platform or export the exact /v1/graph-workflow/completions request as Python, TypeScript, Go, or cURL. Pro/Ultra plans.',
+    keywords: [
+      'workflow',
+      'builder',
+      'visual editor',
+      'node editor',
+      'flow',
+      'graph',
+      'directed graph',
+      'multi-agent',
+      'orchestration',
+      'pipeline',
+      'dag',
+    ],
+    icon: Workflow,
+    category: 'build',
+    status: 'beta',
   },
   {
     href: '/models',

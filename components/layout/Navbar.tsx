@@ -29,6 +29,7 @@ import {
   Package,
   KeyRound,
   BookOpen,
+  Workflow,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -104,6 +105,7 @@ export function Navbar() {
     { href: '/swarms', label: 'Swarms', icon: Network },
     { href: '/sdks', label: 'SDKs', icon: Package },
     { href: '/playground', label: 'Playground', icon: Sparkles },
+    { href: '/workflow-builder', label: 'Workflow Builder', icon: Workflow },
     { href: '/prompts', label: 'Prompts', icon: Wand2 },
     { href: '/pricing', label: 'Pricing', icon: Calculator },
     { href: '/api-keys', label: 'API Keys', icon: KeyRound },

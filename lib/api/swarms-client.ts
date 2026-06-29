@@ -11,6 +11,7 @@ import {
   SwarmSpec,
   SwarmCompletion,
 } from '@/types/api';
+import { GraphWorkflowInput, GraphWorkflowOutput } from '@/types/graph';
 
 /**
  * The Swarms API is FastAPI, so 4xx/5xx errors arrive as `{ detail: ... }`
@@ -139,6 +140,29 @@ export class SwarmsAPIClient {
       }
 
       return (await response.json()) as AgentExecutionResponse[];
+    } catch (err) {
+      throw toAPIError(err);
+    }
+  }
+
+  async executeGraphWorkflow(
+    input: GraphWorkflowInput
+  ): Promise<GraphWorkflowOutput> {
+    try {
+      const response = await fetch(
+        `${this.baseURL}/v1/graph-workflow/completions`,
+        {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify(input),
+        }
+      );
+
+      if (!response.ok) {
+        throw await parseError(response);
+      }
+
+      return (await response.json()) as GraphWorkflowOutput;
     } catch (err) {
       throw toAPIError(err);
     }

@@ -12,6 +12,7 @@ interface ThemeSwitcherProps {
 const options: { value: Theme; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { value: 'light', label: 'Light', icon: Sun },
   { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
 ];
 
 export function ThemeSwitcher({ compact = false }: ThemeSwitcherProps) {
@@ -20,8 +21,10 @@ export function ThemeSwitcher({ compact = false }: ThemeSwitcherProps) {
 
   if (compact) {
     // Cycles through Light → Dark → System on click.
-    const current = options.find((o) => o.value === theme) ?? options[0];
-    const next = options[(options.indexOf(current) + 1) % options.length];
+    const currentIndex = options.findIndex((o) => o.value === theme);
+    const safeIndex = currentIndex !== -1 ? currentIndex : 2;
+    const current = options[safeIndex];
+    const next = options[(safeIndex + 1) % options.length];
     const Icon = current.icon;
     return (
       <button

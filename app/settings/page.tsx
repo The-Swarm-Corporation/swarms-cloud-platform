@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { ThemeSwitcher } from '@/components/layout/ThemeSwitcher';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useProfile, getInitials } from '@/lib/hooks/useProfile';
+import { BillingSection } from '@/components/settings/BillingSection';
 import { signOutAction } from '@/lib/auth/actions';
 import { clearUserScopedStorage } from '@/lib/auth/client-storage';
 import {
@@ -222,6 +223,9 @@ export default function SettingsPage() {
               </div>
             </div>
           </section>
+
+          {/* Subscription section */}
+          <BillingSection />
 
           {/* Appearance section */}
           <section className="mb-6 rounded-lg border border-border bg-card">

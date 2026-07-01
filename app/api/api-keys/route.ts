@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
+import { logAuditEvent } from '@/lib/audit/log-audit-event';
 
 const NO_STORE = 'private, no-store';
 const MAX_NAME_LENGTH = 100;
@@ -120,6 +121,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    logAuditEvent({
+      action: 'api_key.created',
+      targetKind: 'api_key',
+      targetId: data.id,
+      targetLabel: name,
+      actorUserId: user.id,
+    });
 
     // The full key is returned exactly once, at creation time. Every
     // subsequent read returns the masked form.

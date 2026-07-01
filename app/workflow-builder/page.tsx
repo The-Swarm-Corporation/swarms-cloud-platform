@@ -301,7 +301,7 @@ export default function GraphWorkflowPage() {
               className="flex-1 min-w-0 bg-transparent text-sm font-medium text-foreground focus:outline-none placeholder:text-muted-foreground"
             />
             <span className="hidden sm:inline-flex items-center h-5 px-2 rounded-full border border-warning/30 bg-warning/10 text-warning text-[10px] font-medium flex-shrink-0">
-              Pro / Ultra
+              Pro / Premium
             </span>
           </div>
 

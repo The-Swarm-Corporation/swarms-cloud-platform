@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SwarmsAPIClient } from '@/lib/api/swarms-client';
 import { resolveApiKey } from '@/lib/api/server-api-key';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
+import { logAuditEvent } from '@/lib/api/audit';
 
 export async function POST(request: NextRequest) {
   const apiKey = await resolveApiKey();
@@ -39,6 +40,17 @@ export async function POST(request: NextRequest) {
     );
 
     const result = await client.executeAgent(agent_config, task, options);
+
+    logAuditEvent({
+      action: 'swarm.executed',
+      targetKind: 'agent',
+      targetId: agent_config.agent_name,
+      targetLabel: agent_config.agent_name,
+      metadata: {
+        model: agent_config.model_name,
+        task_preview: task.slice(0, 200),
+      },
+    });
 
     return NextResponse.json(result);
   } catch (error) {

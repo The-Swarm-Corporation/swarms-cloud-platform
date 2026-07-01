@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import type { AuthError, Provider } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { logAuditEvent } from '@/lib/api/audit';
 
 function getSiteOrigin(headerOrigin: string | null): string {
   if (headerOrigin) return headerOrigin;
@@ -61,6 +62,17 @@ export async function signInWithPasswordAction(
   if (error) {
     return { ok: false, error: safeAuthError('auth/signin', error) };
   }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  logAuditEvent({
+    action: 'auth.signed_in',
+    targetKind: 'session',
+    actorUserId: user?.id,
+    metadata: { method: 'password' },
+  });
 
   revalidatePath('/', 'layout');
   redirect('/');
@@ -140,7 +152,18 @@ export async function signInWithOAuthAction(
 
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   await supabase.auth.signOut();
+
+  logAuditEvent({
+    action: 'auth.signed_out',
+    targetKind: 'session',
+    actorUserId: user?.id,
+  });
+
   revalidatePath('/', 'layout');
   redirect('/login');
 }

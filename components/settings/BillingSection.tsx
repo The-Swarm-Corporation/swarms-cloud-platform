@@ -6,6 +6,7 @@ import { PLANS, getPlan, type PlanId } from '@/lib/billing/plans';
 import { useUIStore } from '@/lib/store/ui-store';
 import { apiFetch } from '@/lib/api/client-fetch';
 import { Modal } from '@/components/ui/Modal';
+import { BillingHistory } from '@/components/settings/BillingHistory';
 import {
   Crown,
   Check,
@@ -315,6 +316,8 @@ export function BillingSection() {
             })}
           </div>
         )}
+
+        <BillingHistory />
       </div>
 
       <Modal isOpen={successOpen} onClose={() => setSuccessOpen(false)}>

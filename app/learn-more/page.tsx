@@ -481,23 +481,61 @@ export default async function LearnMorePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      <PublicHeader signedIn={signedIn} />
+
       <main className="page-main">
         {/* Hero — introduce The Swarms Cloud */}
-        <section className="relative overflow-hidden">
-          <div className="relative w-full">
-            <img
-              src="/cloud-platform.png"
-              alt="Swarms Cloud platform overview"
-              className="w-full h-auto"
-            />
-            <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-6">
-              <div className="transition-all duration-300 hover:shadow-[0_0_30px_rgba(185,28,28,0.6)] rounded-md">
+        <section className="relative overflow-hidden border-b border-border">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(var(--brand)/0.07),transparent_55%)]"
+          />
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-14 sm:pb-20 text-center">
+            <SwarmsMark className="w-14 h-14 mx-auto mb-6" />
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-brand mb-4">
+              Introducing
+            </p>
+            <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-foreground text-balance">
+              The Swarms Cloud
+            </h1>
+            <p className="mt-4 text-lg sm:text-2xl font-medium text-foreground/80 tracking-tight">
+              The ultimate multi-agent management system
+            </p>
+            <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              Build, deploy, and manage fleets of AI agents from one place.
+              Hierarchical, parallel, and collaborative workflows run on a
+              high-efficiency runtime optimized for concurrency — with full
+              observability over every execution, token, and dollar.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              {signedIn ? (
                 <CtaLink href="/" variant="brand">
                   Open the Dashboard
                   <ArrowRight className="w-4 h-4" />
                 </CtaLink>
-              </div>
+              ) : (
+                <CtaLink href="/signup" variant="brand">
+                  Start building free
+                  <ArrowRight className="w-4 h-4" />
+                </CtaLink>
+              )}
+              <CtaLink href="/pricing" variant="outline">
+                Estimate your costs
+              </CtaLink>
             </div>
+
+            <dl className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-px rounded-lg border border-border bg-border overflow-hidden">
+              {HERO_STATS.map((stat) => (
+                <div key={stat.label} className="bg-card px-4 py-5">
+                  <dd className="text-2xl font-semibold tracking-tight text-foreground">
+                    {stat.value}
+                  </dd>
+                  <dt className="text-xs text-muted-foreground mt-1">
+                    {stat.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 

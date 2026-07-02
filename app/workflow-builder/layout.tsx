@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Workflow Builder',
+  title: 'Workflow Builder — Visual Drag & Drop Multi-Agent Workflows',
   description:
     'Visually build multi-agent workflows on Swarms Cloud. Drag agents onto a canvas, connect them into a directed flow, then run it on the platform or export the request as Python, TypeScript, Go, or cURL.',
   path: '/workflow-builder',
@@ -15,6 +16,14 @@ export const metadata: Metadata = buildMetadata({
     'flow builder',
     'workflow orchestration',
     'graph workflow',
+    'drag and drop AI workflow',
+    'no-code AI workflow',
+    'visual agent builder',
+    'AI workflow designer',
+    'agent canvas',
+    'DAG workflow builder',
+    'AI pipeline builder',
+    'workflow automation tool',
   ],
 });
 
@@ -23,5 +32,12 @@ export default function WorkflowBuilderLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <JsonLd
+        data={pageBreadcrumbJsonLd('Workflow Builder', '/workflow-builder')}
+      />
+      {children}
+    </>
+  );
 }

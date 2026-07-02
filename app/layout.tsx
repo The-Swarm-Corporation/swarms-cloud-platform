@@ -121,6 +121,20 @@ export const metadata: Metadata = {
     title: SITE.name,
     statusBarStyle: 'black-translucent',
   },
+  // Populate via env to verify ownership in each search console.
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    }),
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION && {
+      other: {
+        'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION,
+      },
+    }),
+    ...(process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION && {
+      yandex: process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION,
+    }),
+  },
 };
 
 export default function RootLayout({

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Observability',
+  title: 'Observability — Monitor AI Agents in Production',
   description:
-    'Monitor API request performance, latency, and error rates across every agent and swarm execution on Swarms Cloud.',
+    'Monitor API request performance, latency, and error rates across every agent and swarm execution on Swarms Cloud. Live dashboards for request volume, success rate, and rate limits.',
   path: '/observability',
   keywords: [
     'observability',
@@ -14,6 +15,13 @@ export const metadata: Metadata = buildMetadata({
     'cache hit rate',
     'rate limits',
     'agent telemetry',
+    'AI observability',
+    'LLM observability',
+    'agent monitoring',
+    'AI ops',
+    'LLMOps',
+    'production AI monitoring',
+    'AI performance dashboard',
   ],
 });
 
@@ -22,5 +30,10 @@ export default function ObservabilityLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <JsonLd data={pageBreadcrumbJsonLd('Observability', '/observability')} />
+      {children}
+    </>
+  );
 }

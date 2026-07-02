@@ -24,34 +24,121 @@ export const SITE = {
   shortDescription:
     'The cloud for building, deploying, and scaling multi-agent systems.',
   keywords: [
+    // Brand
     'Swarms',
     'Swarms Cloud',
     'Swarms API',
+    'Swarms AI',
+    'swarms framework',
+    'swarms python',
+    'Kye Gomez',
+    // Category
     'multi-agent systems',
     'multi-agent orchestration',
+    'multi-agent AI',
+    'multi-agent framework',
+    'multi-agent platform',
+    'multi-agent collaboration',
     'AI agents',
+    'AI agent platform',
+    'AI agent orchestration platform',
+    'AI agent infrastructure',
+    'AI agent framework',
+    'AI agent API',
     'agent orchestration',
+    'agentic AI',
+    'agentic workflows',
     'agentic infrastructure',
+    'autonomous agents',
+    'autonomous AI agents',
     'AI infrastructure',
     'LLM orchestration',
+    'LLM agents',
+    'LLM API',
+    'swarm intelligence',
+    'agent swarm',
+    'AI swarm',
     'agent runtime',
+    'Rust agent runtime',
     'agent framework',
     'agent platform',
+    'agents as a service',
+    // Build / deploy / scale
+    'build AI agents',
+    'deploy AI agents',
+    'scale AI agents',
+    'create AI agents',
+    'production AI agents',
+    'enterprise AI agents',
+    'AI agent deployment',
+    'AI agent hosting',
     'enterprise AI',
+    'production AI',
     'AI automation',
+    'workflow automation',
+    'AI workflow automation',
+    'business process automation',
+    // Architectures
     'hierarchical swarm',
     'sequential workflow',
     'concurrent workflow',
     'mixture of agents',
     'council as a judge',
+    'debate with judge',
     'multi-agent router',
     'auto swarm builder',
+    'majority voting agents',
+    'group chat agents',
+    'graph workflow',
+    'agent rearrange',
+    'planner worker swarm',
+    // Capabilities
     'reasoning agents',
     'batch agents',
+    'deep research API',
+    'AI research agents',
+    'structured outputs',
+    'function calling',
+    'tool calling',
+    'MCP',
+    'Model Context Protocol',
+    'vision agents',
+    'web search agents',
+    'RAG agents',
+    'retrieval augmented generation',
+    // Models & compatibility
     'OpenAI compatible API',
     'GPT agents',
+    'GPT-4o agents',
     'Claude agents',
-    'production AI',
+    'Gemini agents',
+    'Llama agents',
+    'DeepSeek agents',
+    'Qwen agents',
+    // Use cases
+    'AI copilots',
+    'AI assistants',
+    'no-code agent builder',
+    'visual workflow builder',
+    'drag and drop AI workflow',
+    'AI research assistant',
+    'data analysis agents',
+    'customer support agents',
+    'financial analysis AI',
+    'code generation agents',
+    // Comparisons / adjacent searches
+    'LangChain alternative',
+    'LangGraph alternative',
+    'AutoGen alternative',
+    'CrewAI alternative',
+    'best multi-agent framework',
+    'best AI agent platform',
+    // Developer
+    'Python AI agents',
+    'TypeScript AI agents',
+    'agent SDK',
+    'AI developer tools',
+    'AI API platform',
   ],
   twitter: '@swarms_corp',
   author: 'Swarms',
@@ -164,6 +251,32 @@ export const organizationJsonLd = {
     'https://twitter.com/swarms_corp',
   ],
 };
+
+/**
+ * JSON-LD BreadcrumbList markup for a page. Pass the trail from the home
+ * page down to the current page; rendered via <JsonLd> in the page's layout.
+ */
+export function breadcrumbJsonLd(
+  items: ReadonlyArray<{ name: string; path: string }>
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: `${SITE.url}${item.path}`,
+    })),
+  };
+}
+
+/**
+ * JSON-LD BreadcrumbList for the common Home → <page> case.
+ */
+export function pageBreadcrumbJsonLd(name: string, path: string) {
+  return breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name, path }]);
+}
 
 /**
  * JSON-LD SoftwareApplication markup positioning Swarms Cloud as the product.

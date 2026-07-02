@@ -47,6 +47,18 @@ export const metadata = buildMetadata({
     'hierarchical swarm',
     'sequential workflow',
     'concurrent workflow',
+    'what is Swarms',
+    'Swarms Cloud overview',
+    'multi-agent AI explained',
+    'how to build AI agents',
+    'deploy multi-agent systems',
+    'enterprise agent platform',
+    'AI agent use cases',
+    'deep research agents',
+    'agent tools and MCP',
+    'structured output agents',
+    'Rust agent runtime',
+    'scalable AI infrastructure',
   ],
 });
 

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Prompt generator',
+  title: 'Prompt Generator — Production-Grade System Prompts',
   description:
-    'Auto-generate production-grade system prompts for AI agents on Swarms Cloud. The specialized Prompt Architect agent (claude-sonnet-4-6) turns a one-line brief into a drop-in deployable prompt.',
+    'Auto-generate production-grade system prompts for AI agents on Swarms Cloud. The specialized Prompt Architect agent turns a one-line brief into a drop-in deployable system prompt in seconds.',
   path: '/prompts',
   keywords: [
     'prompt generator',
@@ -12,8 +13,15 @@ export const metadata: Metadata = buildMetadata({
     'AI prompt engineering',
     'prompt architect',
     'auto prompt',
-    'claude sonnet',
     'production prompts',
+    'prompt engineering tool',
+    'free prompt generator',
+    'AI system prompt examples',
+    'agent system prompts',
+    'prompt optimization',
+    'prompt writing assistant',
+    'LLM prompt builder',
+    'best system prompts',
   ],
 });
 
@@ -22,5 +30,10 @@ export default function PromptsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <JsonLd data={pageBreadcrumbJsonLd('Prompt Generator', '/prompts')} />
+      {children}
+    </>
+  );
 }

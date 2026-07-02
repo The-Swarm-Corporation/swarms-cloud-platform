@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 // Workbench is a fully interactive client page (Zustand store, browser
 // FileReader for image upload, clipboard for snippet copy). Opt out of
@@ -8,9 +9,9 @@ import { buildMetadata } from '@/lib/seo';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Workbench',
+  title: 'Workbench — Build, Configure & Run AI Agents',
   description:
-    'Build, configure, and run agents on Swarms Cloud. Tune model, prompt, temperature, and tools, then execute against the production Swarms API in one click.',
+    'Build, configure, and run AI agents on Swarms Cloud. Tune model, system prompt, temperature, and tools, then execute against the production Swarms API in one click — an IDE for autonomous agents.',
   path: '/workbench',
   keywords: [
     'agent workbench',
@@ -18,6 +19,13 @@ export const metadata: Metadata = buildMetadata({
     'configure agents',
     'prompt engineering',
     'agent IDE',
+    'build AI agents online',
+    'AI agent studio',
+    'agent development environment',
+    'test AI agents',
+    'agent configuration tool',
+    'LLM agent builder',
+    'create custom AI agent',
   ],
 });
 
@@ -26,5 +34,10 @@ export default function WorkbenchLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <JsonLd data={pageBreadcrumbJsonLd('Workbench', '/workbench')} />
+      {children}
+    </>
+  );
 }

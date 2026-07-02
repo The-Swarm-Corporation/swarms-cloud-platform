@@ -3,11 +3,15 @@ import { redirect } from 'next/navigation';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { AuthForm } from '@/components/auth/AuthForm';
 import { createClient } from '@/lib/supabase/server';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'Log in',
-  description: 'Log into your Swarms account.',
-};
+  description:
+    'Log into your Swarms Cloud account to manage AI agents, run multi-agent swarms, and monitor executions.',
+  path: '/login',
+  keywords: ['Swarms login', 'Swarms Cloud sign in', 'Swarms account'],
+});
 
 // Map opaque error codes from `/auth/callback` to safe user-facing copy.
 // We never render an arbitrary `error` query value because callers (or

@@ -1,10 +1,14 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: 'Privacy',
-  description: 'How Swarms collects, uses, and protects your data.',
-};
+export const metadata = buildMetadata({
+  title: 'Privacy Policy',
+  description:
+    'How Swarms collects, uses, and protects your data across the Swarms Cloud platform, API, and dashboard.',
+  path: '/privacy',
+  keywords: ['Swarms privacy policy', 'data protection', 'GDPR', 'CCPA'],
+});
 
 const EFFECTIVE_DATE = 'June 5, 2026';
 

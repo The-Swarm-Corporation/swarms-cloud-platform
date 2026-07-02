@@ -1,10 +1,14 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: 'Terms',
-  description: 'The agreement governing your use of Swarms Cloud.',
-};
+export const metadata = buildMetadata({
+  title: 'Terms of Service',
+  description:
+    'The agreement governing your use of the Swarms Cloud platform, API, and related services.',
+  path: '/terms',
+  keywords: ['Swarms terms of service', 'terms and conditions', 'API terms'],
+});
 
 const EFFECTIVE_DATE = 'June 5, 2026';
 

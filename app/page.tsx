@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { MetricsCard } from '@/components/dashboard/MetricsCard';
 import { RateLimitCard } from '@/components/dashboard/RateLimitCard';
 import { RecentAppsCard } from '@/components/dashboard/RecentAppsCard';
 import { RecentAgentsCard } from '@/components/dashboard/RecentAgentsCard';
 import { PremiumUpgradeCard } from '@/components/dashboard/PremiumUpgradeCard';
+import { FreedomModeCard } from '@/components/dashboard/FreedomModeCard';
 import { ExecutionHistoryPreview } from '@/components/dashboard/ExecutionHistoryPreview';
 import { useRateLimits } from '@/lib/hooks/useRateLimits';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
@@ -123,23 +125,39 @@ export default function DashboardPage() {
             <ExecutionHistoryPreview logs={logs} />
           </div>
 
-          {/* Premium upgrade */}
+          {/* Freedom Mode — free access until July 6, 11:59 PM PT */}
           <div className="mb-8">
-            <PremiumUpgradeCard currentTier={rateLimits?.tier} />
+            <FreedomModeCard />
           </div>
 
           {/* Rate limits */}
           <section className="mb-6">
             <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
-              <h2 className="text-base font-semibold tracking-tight text-foreground">
-                Rate limits
-              </h2>
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-base font-semibold tracking-tight text-foreground">
+                  Rate limits
+                </h2>
+                <Link
+                  href="/rate-limits"
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  View details
+                </Link>
+              </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {rateLimits?.tier && (
                   <span className="inline-flex items-center gap-1.5 px-2 h-6 rounded-md border border-border bg-subtle text-xs">
                     <span className="text-muted-foreground">Tier</span>
                     <span className="font-medium text-foreground">
                       {rateLimits.tier.toUpperCase()}
+                    </span>
+                  </span>
+                )}
+                {rateLimits?.limits && (
+                  <span className="inline-flex items-center gap-1.5 px-2 h-6 rounded-md border border-border bg-subtle text-xs">
+                    <span className="text-muted-foreground">Tokens / agent</span>
+                    <span className="font-medium text-foreground tabular-nums">
+                      {rateLimits.limits.tokens_per_agent.toLocaleString()}
                     </span>
                   </span>
                 )}
@@ -193,32 +211,10 @@ export default function DashboardPage() {
             ) : null}
           </section>
 
-          {/* Limit configuration */}
-          {rateLimits?.limits && (
-            <section className="rounded-lg border border-border bg-card p-5">
-              <h3 className="text-sm font-semibold tracking-tight text-foreground mb-4">
-                Limit configuration
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <ConfigStat
-                  label="Max / min"
-                  value={rateLimits.limits.maximum_requests_per_minute}
-                />
-                <ConfigStat
-                  label="Max / hour"
-                  value={rateLimits.limits.maximum_requests_per_hour}
-                />
-                <ConfigStat
-                  label="Max / day"
-                  value={rateLimits.limits.maximum_requests_per_day}
-                />
-                <ConfigStat
-                  label="Tokens / agent"
-                  value={rateLimits.limits.tokens_per_agent}
-                />
-              </div>
-            </section>
-          )}
+          {/* Premium upgrade */}
+          <div className="mb-8">
+            <PremiumUpgradeCard currentTier={rateLimits?.tier} />
+          </div>
         </div>
       </main>
     </div>
@@ -229,15 +225,4 @@ function isProTier(tier: string | null | undefined): boolean {
   if (!tier) return false;
   const t = tier.toLowerCase();
   return t === 'pro' || t === 'premium' || t === 'enterprise';
-}
-
-function ConfigStat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div>
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
-        {label}
-      </div>
-      <div className="text-lg font-semibold tabular-nums text-foreground">{value}</div>
-    </div>
-  );
 }

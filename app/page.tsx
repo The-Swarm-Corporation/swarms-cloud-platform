@@ -14,6 +14,7 @@ import { useRateLimits } from '@/lib/hooks/useRateLimits';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
 import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
 import { useCredits } from '@/lib/hooks/useCredits';
+import { useMetricsSummary } from '@/lib/hooks/useMetricsSummary';
 import {
   Users,
   XCircle,
@@ -31,19 +32,23 @@ export default function DashboardPage() {
   const { configs, refetch: refetchConfigs } = useAgentConfigsList();
   const { logs, refetch: refetchLogs } = useSwarmLogs();
   const { credits, refetch: refetchCredits } = useCredits();
+  const { summary, refetch: refetchSummary } = useMetricsSummary();
 
   const metrics = useMemo(() => {
     return {
       totalAgents: configs.length,
-      totalExecutions: logs.length,
+      // True lifetime count from /v1/metrics/summary (accurate past the
+      // 1,000-row log cap); fall back to the log count until it loads.
+      totalCompletions: summary?.total_completion_calls ?? logs.length,
     };
-  }, [configs, logs]);
+  }, [configs, logs, summary]);
 
   const handleRefresh = () => {
     refetch();
     refetchConfigs();
     refetchLogs();
     refetchCredits();
+    refetchSummary();
   };
 
   return (
@@ -94,9 +99,13 @@ export default function DashboardPage() {
             />
             <MetricsCard
               title="Completions"
-              value={metrics.totalExecutions}
+              value={metrics.totalCompletions.toLocaleString()}
               icon={Zap}
-              subtitle="All-time"
+              subtitle={
+                summary
+                  ? `${summary.completions_last_7d.toLocaleString()} in the last 7 days`
+                  : 'All-time'
+              }
             />
             <MetricsCard
               title="Credit balance"

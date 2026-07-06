@@ -328,6 +328,23 @@ export class SwarmsAPIClient {
       throw toAPIError(err);
     }
   }
+
+  async getMetricsSummary(): Promise<unknown> {
+    try {
+      const response = await fetch(`${this.baseURL}/v1/metrics/summary`, {
+        method: 'GET',
+        headers: this.headers,
+      });
+
+      if (!response.ok) {
+        throw await parseError(response);
+      }
+
+      return await response.json();
+    } catch (err) {
+      throw toAPIError(err);
+    }
+  }
 }
 
 export default SwarmsAPIClient;

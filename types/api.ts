@@ -58,12 +58,6 @@ export interface CreditBalanceResponse {
 }
 
 // Usage metrics summary from /v1/metrics/summary
-export interface MetricsSummaryAgent {
-  agent_name: string;
-  model_name: string;
-  last_used: string;
-}
-
 export interface MetricsSummaryResponse {
   success: boolean;
   unique_agents: number;
@@ -71,7 +65,6 @@ export interface MetricsSummaryResponse {
   successful_completions: number;
   completions_last_24h: number;
   completions_last_7d: number;
-  agents: MetricsSummaryAgent[];
   timestamp: string;
 }
 

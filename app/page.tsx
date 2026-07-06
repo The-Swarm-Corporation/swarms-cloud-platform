@@ -13,9 +13,9 @@ import { ExecutionHistoryPreview } from '@/components/dashboard/ExecutionHistory
 import { useRateLimits } from '@/lib/hooks/useRateLimits';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
 import { useSwarmLogs } from '@/lib/hooks/useSwarmLogs';
+import { useCredits } from '@/lib/hooks/useCredits';
 import {
   Users,
-  CheckCircle2,
   XCircle,
   Zap,
   Calendar,
@@ -23,28 +23,19 @@ import {
   RefreshCw,
   ArrowUpRight,
   Sparkles,
+  Wallet,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { rateLimits, isLoading, error, refetch } = useRateLimits();
   const { configs, refetch: refetchConfigs } = useAgentConfigsList();
   const { logs, refetch: refetchLogs } = useSwarmLogs();
+  const { credits, refetch: refetchCredits } = useCredits();
 
   const metrics = useMemo(() => {
-    const totalAgents = configs.length;
-    const totalExecutions = logs.length;
-    const completedExecutions = logs.filter((l) => l.success).length;
-
-    const successRate =
-      totalExecutions > 0
-        ? Math.round((completedExecutions / totalExecutions) * 100)
-        : 0;
-
     return {
-      totalAgents,
-      completedExecutions,
-      totalExecutions,
-      successRate,
+      totalAgents: configs.length,
+      totalExecutions: logs.length,
     };
   }, [configs, logs]);
 
@@ -52,6 +43,7 @@ export default function DashboardPage() {
     refetch();
     refetchConfigs();
     refetchLogs();
+    refetchCredits();
   };
 
   return (
@@ -101,16 +93,20 @@ export default function DashboardPage() {
               }
             />
             <MetricsCard
-              title="Executions"
+              title="Completions"
               value={metrics.totalExecutions}
               icon={Zap}
               subtitle="All-time"
             />
             <MetricsCard
-              title="Completed"
-              value={metrics.completedExecutions}
-              icon={CheckCircle2}
-              subtitle={`${metrics.successRate}% success rate`}
+              title="Credit balance"
+              value={credits ? `$${credits.total_credits.toFixed(2)}` : '—'}
+              icon={Wallet}
+              subtitle={
+                credits
+                  ? `$${credits.credit.toFixed(2)} paid · $${credits.free_credit.toFixed(2)} free`
+                  : 'Loading…'
+              }
             />
           </div>
 

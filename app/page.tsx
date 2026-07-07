@@ -8,7 +8,6 @@ import { RateLimitCard } from '@/components/dashboard/RateLimitCard';
 import { RecentAppsCard } from '@/components/dashboard/RecentAppsCard';
 import { RecentAgentsCard } from '@/components/dashboard/RecentAgentsCard';
 import { PremiumUpgradeCard } from '@/components/dashboard/PremiumUpgradeCard';
-import { FreedomModeCard } from '@/components/dashboard/FreedomModeCard';
 import { ExecutionHistoryPreview } from '@/components/dashboard/ExecutionHistoryPreview';
 import { useRateLimits } from '@/lib/hooks/useRateLimits';
 import { useAgentConfigsList } from '@/lib/hooks/useAgentConfigsList';
@@ -128,11 +127,6 @@ export default function DashboardPage() {
           {/* Recent executions preview */}
           <div className="mb-6">
             <ExecutionHistoryPreview logs={logs} />
-          </div>
-
-          {/* Freedom Mode — free access until July 6, 11:59 PM PT */}
-          <div className="mb-8">
-            <FreedomModeCard />
           </div>
 
           {/* Rate limits */}

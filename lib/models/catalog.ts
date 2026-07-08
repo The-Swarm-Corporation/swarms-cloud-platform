@@ -139,7 +139,9 @@ function titleToken(token: string): string {
 
 /** "gpt-4.1-mini" → "GPT 4.1 Mini"; "claude-opus-4-1" → "Claude Opus 4.1" */
 export function cleanModelName(name: string): string {
-  const tokens = name.split(/[-_\s]+/).filter(Boolean);
+  // Split on slashes too: multi-segment names like "zai-org/glm-4.5"
+  // (after the provider prefix is removed) should read "Zai Org GLM 4.5".
+  const tokens = name.split(/[-_\s/]+/).filter(Boolean);
 
   // Re-join dash-separated version parts: ["4", "1"] → "4.1". Only short
   // numeric continuations qualify so date stamps like "20250514" stay apart.
@@ -483,7 +485,7 @@ export function modelKeywords(modelId: string): string[] {
   keywords.add(`run ${modelId}`);
   keywords.add(`use ${clean} API`);
   keywords.add(`how to use ${clean}`);
-  keywords.add(`${clean} OpenAI compatible API`);
+  keywords.add(`${clean} Agent Completions API`);
   keywords.add(`${clean} REST API`);
   keywords.add(`best model for AI agents`);
   if (providerName) {
@@ -516,7 +518,7 @@ export function modelSeoDescription(
     return catalogDescription;
   }
   const clean = cleanModelName(splitModelId(modelId).name);
-  return `Run ${clean} (${modelId}) through one OpenAI-compatible Swarms API. Copy Python, TypeScript & cURL examples, launch a single agent, and scale to multi-agent swarms.`;
+  return `Run ${clean} (${modelId}) through the Swarms Agent Completions API. Copy Python, TypeScript & cURL examples, launch a single agent, and scale to multi-agent swarms.`;
 }
 
 /**
@@ -562,7 +564,7 @@ export function buildModelFaqs(modelId: string): ModelFaq[] {
       question: providerName
         ? `Do I need a separate ${providerName} API key to use ${clean}?`
         : `Do I need a separate provider API key to use ${clean}?`,
-      answer: `No. A single Swarms API key gives you access to every model in the catalog through one OpenAI-compatible API — no separate provider accounts required.`,
+      answer: `No. A single Swarms API key gives you access to every model in the catalog through one agent completions API, no separate provider accounts required.`,
     },
   ];
 }

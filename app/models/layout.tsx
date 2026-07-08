@@ -4,7 +4,7 @@ import { buildMetadata } from '@/lib/seo';
 export const metadata: Metadata = buildMetadata({
   title: 'AI Model Catalog — GPT, Claude, Gemini, Llama & More',
   description:
-    'Browse every AI model available on Swarms Cloud — GPT-4o, Claude Opus and Sonnet, Gemini, Llama, DeepSeek, Qwen, and more — ready to plug into agent and swarm configurations through one OpenAI-compatible API.',
+    'Browse every AI model available on Swarms Cloud — GPT-4o, Claude Opus and Sonnet, Gemini, Llama, DeepSeek, Qwen, and more — ready to plug into agent and swarm configurations through the Agent Completions API.',
   path: '/models',
   keywords: [
     'AI model catalog',
@@ -18,7 +18,7 @@ export const metadata: Metadata = buildMetadata({
     'Qwen',
     'Mistral',
     'model selection',
-    'OpenAI compatible',
+    'Agent Completions API',
     'LLM comparison',
     'best LLM for agents',
     'AI model list',

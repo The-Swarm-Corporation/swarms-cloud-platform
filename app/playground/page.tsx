@@ -70,6 +70,7 @@ export default function PlaygroundPage() {
       ? (param as SwarmType)
       : 'SequentialWorkflow';
   })();
+  const initialModel = searchParams?.get('model') || 'gpt-5.4';
 
   const [swarmName, setSwarmName] = useState('Untitled Swarm');
   const [swarmType, setSwarmType] = useState<SwarmType>(initialType);
@@ -81,12 +82,14 @@ export default function PlaygroundPage() {
   const [agents, setAgents] = useState<SwarmAgentSpec[]>([
     {
       ...makeBlankAgent(0),
+      model_name: initialModel,
       agent_name: 'Researcher',
       system_prompt:
         'You research the topic deeply and provide structured findings.',
     },
     {
       ...makeBlankAgent(1),
+      model_name: initialModel,
       agent_name: 'Writer',
       system_prompt:
         'You take the research and craft a clear, well-structured response.',

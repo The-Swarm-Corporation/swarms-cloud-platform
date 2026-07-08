@@ -1,0 +1,391 @@
+'use client';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { Navbar } from '@/components/layout/Navbar';
+import { SnippetPreview } from '@/components/ui/SnippetPreview';
+import { apiFetch } from '@/lib/api/client-fetch';
+import {
+  flattenModels,
+  entryModelName,
+  displayModelName,
+  cleanModelName,
+  splitModelId,
+  providerLabel,
+  modelHref,
+  buildSingleAgentPayload,
+  buildSwarmPayload,
+  type ModelEntry,
+} from '@/lib/models/catalog';
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  Cpu,
+  FlaskConical,
+  KeyRound,
+  Loader2,
+  TerminalSquare,
+} from 'lucide-react';
+
+const ENV_SNIPPET = `# .env
+SWARMS_API_KEY="your-api-key"
+
+# or export it in your shell
+export SWARMS_API_KEY="your-api-key"`;
+
+function CopyButton({
+  text,
+  label,
+  className = '',
+}: {
+  text: string;
+  label: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // ignore
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className={`inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0 ${className}`}
+      aria-label={label}
+      title={label}
+    >
+      {copied ? (
+        <Check className="w-3.5 h-3.5 text-success" />
+      ) : (
+        <Copy className="w-3.5 h-3.5" />
+      )}
+    </button>
+  );
+}
+
+function StepCard({
+  step,
+  title,
+  icon,
+  children,
+}: {
+  step: number;
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-4 sm:p-5">
+      <div className="flex items-center gap-2.5 mb-3">
+        <span className="w-6 h-6 rounded-full bg-subtle border border-border text-[11px] font-semibold text-muted-foreground inline-flex items-center justify-center tabular-nums flex-shrink-0">
+          {step}
+        </span>
+        <span className="text-muted-foreground">{icon}</span>
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">
+          {title}
+        </h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export default function ModelDetailPage() {
+  const params = useParams<{ model: string[] }>();
+  const modelId = useMemo(() => {
+    const segments = Array.isArray(params?.model)
+      ? params.model
+      : params?.model
+      ? [params.model]
+      : [];
+    return segments.map((s) => decodeURIComponent(s)).join('/');
+  }, [params]);
+
+  const [catalog, setCatalog] = useState<ModelEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch('/api/models', { method: 'GET' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setCatalog(flattenModels(data?.models ?? data));
+      } catch {
+        // page still renders from the URL id
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const entry = useMemo(
+    () =>
+      catalog.find((m) => m.id === modelId || entryModelName(m) === modelId) ??
+      null,
+    [catalog, modelId]
+  );
+
+  const modelName = entry ? entryModelName(entry) : modelId;
+  const displayName = displayModelName(modelId);
+  const { provider } = splitModelId(modelId);
+
+  const meta =
+    entry?.raw && typeof entry.raw === 'object'
+      ? (entry.raw as Record<string, unknown>)
+      : null;
+  const metaProvider =
+    (meta && typeof meta.provider === 'string' && meta.provider) || provider;
+  const description =
+    (meta &&
+      (typeof meta.description === 'string'
+        ? meta.description
+        : typeof meta.summary === 'string'
+        ? meta.summary
+        : null)) ||
+    null;
+
+  const recommended = useMemo(() => {
+    const others = catalog.filter(
+      (m) => m.id !== modelId && entryModelName(m) !== modelName
+    );
+    if (others.length === 0) return [];
+
+    const providerOf = (m: ModelEntry) => {
+      const rec =
+        m.raw && typeof m.raw === 'object'
+          ? (m.raw as Record<string, unknown>)
+          : null;
+      return (
+        (rec && typeof rec.provider === 'string' && rec.provider) ||
+        splitModelId(m.id).provider
+      );
+    };
+
+    const pool = metaProvider
+      ? others.filter(
+          (m) => providerOf(m)?.toLowerCase() === metaProvider.toLowerCase()
+        )
+      : [];
+    const source = pool.length >= 1 ? pool : others;
+    const shuffled = [...source].sort(() => Math.random() - 0.5);
+    const picks = shuffled.slice(0, 3);
+    if (picks.length < 3 && source !== others) {
+      const rest = others
+        .filter((m) => !picks.includes(m))
+        .sort(() => Math.random() - 0.5);
+      picks.push(...rest.slice(0, 3 - picks.length));
+    }
+    return picks;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog, modelId, modelName, metaProvider]);
+
+  const sameProvider =
+    recommended.length > 0 &&
+    metaProvider !== null &&
+    recommended.every((m) => {
+      const rec =
+        m.raw && typeof m.raw === 'object'
+          ? (m.raw as Record<string, unknown>)
+          : null;
+      const p =
+        (rec && typeof rec.provider === 'string' && rec.provider) ||
+        splitModelId(m.id).provider;
+      return p?.toLowerCase() === metaProvider?.toLowerCase();
+    });
+
+  const singleAgentPayload = useMemo(
+    () => buildSingleAgentPayload(modelName),
+    [modelName]
+  );
+  const swarmPayload = useMemo(() => buildSwarmPayload(modelName), [modelName]);
+
+  const playgroundHref = `/playground?model=${encodeURIComponent(modelName)}`;
+
+  return (
+    <div className="page-wrapper">
+      <Navbar />
+
+      <main className="page-main px-4 sm:px-6 lg:px-8 py-6 lg:py-8 box-border">
+        <div className="max-w-5xl mx-auto w-full">
+          <Link
+            href="/models"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-5"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            All models
+          </Link>
+
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg bg-subtle border border-border flex items-center justify-center flex-shrink-0">
+                <Cpu className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+                  {displayName}
+                </h1>
+                <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                  <code className="text-xs font-mono text-muted-foreground truncate">
+                    {modelName}
+                  </code>
+                  <CopyButton text={modelName} label="Copy model name" />
+                </div>
+                {description && (
+                  <p className="text-sm text-muted-foreground mt-3 max-w-2xl">
+                    {description}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Link
+              href={playgroundHref}
+              className="inline-flex items-center gap-1.5 justify-center h-9 px-4 text-sm font-medium rounded-md bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80 border border-foreground transition-colors flex-shrink-0"
+            >
+              <FlaskConical className="w-4 h-4" />
+              Open in Playground
+            </Link>
+          </div>
+
+          {loading && catalog.length === 0 && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-6">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Loading catalog details…
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1 mb-4">
+            <p className="text-xs text-muted-foreground">Quick start</p>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              Get started with {cleanModelName(splitModelId(modelId).name)}
+            </h2>
+          </div>
+
+          <div className="flex flex-col gap-4 mb-10">
+            <StepCard
+              step={1}
+              title="Get your Swarms API key"
+              icon={<KeyRound className="w-4 h-4" />}
+            >
+              <p className="text-sm text-muted-foreground">
+                Create an API key from your{' '}
+                <Link
+                  href="/api-keys"
+                  className="text-accent hover:underline"
+                >
+                  API keys dashboard
+                </Link>{' '}
+                or at{' '}
+                <a
+                  href="https://swarms.world/platform/api-keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline"
+                >
+                  swarms.world/platform/api-keys
+                </a>
+                .
+              </p>
+            </StepCard>
+
+            <StepCard
+              step={2}
+              title="Set it in your environment"
+              icon={<TerminalSquare className="w-4 h-4" />}
+            >
+              <div className="relative">
+                <pre className="p-3 rounded-md bg-subtle border border-border overflow-x-auto text-[12px] leading-relaxed text-foreground font-mono">
+                  {ENV_SNIPPET}
+                </pre>
+                <CopyButton
+                  text={ENV_SNIPPET}
+                  label="Copy environment setup"
+                  className="absolute top-2 right-2"
+                />
+              </div>
+            </StepCard>
+
+            <StepCard
+              step={3}
+              title="Run a single agent"
+              icon={<Cpu className="w-4 h-4" />}
+            >
+              <p className="text-sm text-muted-foreground mb-3">
+                Execute one agent with{' '}
+                <code className="text-xs font-mono">{modelName}</code> via the
+                Agent Completions API.
+              </p>
+              <SnippetPreview
+                endpoint="/v1/agent/completions"
+                method="POST"
+                payload={singleAgentPayload}
+                title="Single agent completion"
+              />
+            </StepCard>
+
+            <StepCard
+              step={4}
+              title="Scale to a multi-agent swarm"
+              icon={<Cpu className="w-4 h-4" />}
+            >
+              <p className="text-sm text-muted-foreground mb-3">
+                Chain multiple agents on{' '}
+                <code className="text-xs font-mono">{modelName}</code> with the
+                Swarm Completions API.
+              </p>
+              <SnippetPreview
+                endpoint="/v1/swarm/completions"
+                method="POST"
+                payload={swarmPayload}
+                title="Multi-agent swarm"
+              />
+            </StepCard>
+          </div>
+
+          {recommended.length > 0 && (
+            <div className="border-t border-border pt-6">
+              <h2 className="text-sm font-semibold tracking-tight text-foreground mb-3">
+                {sameProvider && metaProvider
+                  ? `More from ${providerLabel(metaProvider)}`
+                  : 'More models to try'}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {recommended.map((m) => (
+                  <Link
+                    key={m.id}
+                    href={modelHref(m.id)}
+                    className="rounded-lg border border-border bg-card p-3 flex items-center gap-2.5 min-w-0 transition-colors hover:border-border-strong hover:bg-muted/40"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-subtle border border-border flex items-center justify-center flex-shrink-0">
+                      <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">
+                        {displayModelName(m.id)}
+                      </div>
+                      <div className="text-[11px] font-mono text-muted-foreground truncate">
+                        {entryModelName(m)}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

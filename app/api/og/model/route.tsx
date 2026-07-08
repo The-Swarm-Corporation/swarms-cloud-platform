@@ -3,6 +3,7 @@ import { ImageResponse } from 'next/og';
 import {
   cleanModelName,
   splitModelId,
+  entryProvider,
   providerVisual,
 } from '@/lib/models/catalog';
 
@@ -19,12 +20,14 @@ const SIZE = { width: 1200, height: 630 };
  */
 export async function GET(request: NextRequest) {
   const modelId = request.nextUrl.searchParams.get('id')?.slice(0, 100) || '';
-  const { provider, name } = modelId
-    ? splitModelId(modelId)
-    : { provider: null as string | null, name: '' };
+  const { name } = modelId ? splitModelId(modelId) : { name: '' };
   const clean = modelId ? cleanModelName(name) : 'Model Catalog';
+  // entryProvider also infers providers from bare names (claude-* →
+  // anthropic), so un-prefixed ids still get their brand pill.
+  const provider = modelId
+    ? entryProvider({ id: modelId, raw: null, searchText: '' })
+    : null;
   const visual = providerVisual(provider);
-  const accent = visual?.color ?? '#EE0712';
 
   return new ImageResponse(
     (
@@ -33,111 +36,94 @@ export async function GET(request: NextRequest) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          backgroundColor: '#09090b',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, #000000 0%, #161618 100%)',
+          padding: 72,
           fontFamily: 'sans-serif',
         }}
       >
-        {/* Accent rail in the provider's brand color */}
-        <div style={{ width: 14, height: '100%', backgroundColor: accent }} />
-
         <div
           style={{
-            flex: 1,
             display: 'flex',
-            flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'space-between',
-            padding: 64,
           }}
         >
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              color: '#f5f5f7',
+              fontSize: 30,
+              fontWeight: 600,
+              letterSpacing: -0.5,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 9999,
-                  backgroundColor: '#EE0712',
-                }}
-              />
-              <div style={{ color: '#a1a1aa', fontSize: 30 }}>
-                Swarms Cloud
-              </div>
-            </div>
-            {visual && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  padding: '10px 22px',
-                  borderRadius: 9999,
-                  border: `2px solid ${accent}55`,
-                  backgroundColor: `${accent}1a`,
-                }}
-              >
-                <div
-                  style={{
-                    color: accent,
-                    fontSize: 26,
-                    fontWeight: 700,
-                  }}
-                >
-                  {visual.label}
-                </div>
-              </div>
-            )}
+            Swarms Cloud
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {visual && (
             <div
               style={{
-                color: '#fafafa',
-                fontSize:
-                  clean.length > 28 ? 54 : clean.length > 18 ? 66 : 80,
-                fontWeight: 700,
-                lineHeight: 1.05,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 24px',
+                borderRadius: 9999,
+                border: '1px solid #3a3a3c',
+                backgroundColor: '#1c1c1e',
+                color: '#d1d1d6',
+                fontSize: 26,
+                fontWeight: 600,
               }}
             >
-              {clean}
+              {visual.label}
             </div>
-            {modelId && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignSelf: 'flex-start',
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  backgroundColor: '#18181b',
-                  border: '1px solid #27272a',
-                  color: '#a1a1aa',
-                  fontSize: 28,
-                  fontFamily: 'monospace',
-                }}
-              >
-                {modelId}
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              color: '#f5f5f7',
+              fontSize: clean.length > 28 ? 54 : clean.length > 18 ? 66 : 80,
+              fontWeight: 700,
+              letterSpacing: -1.5,
+              lineHeight: 1.05,
             }}
           >
-            <div style={{ color: '#a1a1aa', fontSize: 26 }}>
-              API quickstart · Single agents · Multi-agent swarms
+            {clean}
+          </div>
+          {modelId && (
+            <div
+              style={{
+                display: 'flex',
+                alignSelf: 'flex-start',
+                padding: '10px 20px',
+                borderRadius: 12,
+                backgroundColor: '#1c1c1e',
+                border: '1px solid #2c2c2e',
+                color: '#98989d',
+                fontSize: 28,
+                fontFamily: 'monospace',
+              }}
+            >
+              {modelId}
             </div>
-            <div style={{ color: '#52525b', fontSize: 26 }}>
-              swarms.ai/models
-            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderTop: '1px solid #2c2c2e',
+            paddingTop: 32,
+          }}
+        >
+          <div style={{ color: '#98989d', fontSize: 26 }}>
+            API quickstart · Single agents · Multi-agent swarms
+          </div>
+          <div style={{ color: '#636366', fontSize: 26 }}>
+            cloud.swarms.world/models
           </div>
         </div>
       </div>

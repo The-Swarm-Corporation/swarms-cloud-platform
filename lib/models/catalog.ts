@@ -529,7 +529,7 @@ export function modelOverview(modelId: string): string {
   const providerName = provider ? providerLabel(provider) : null;
   const vision = detectCapabilities(modelId).vision;
   return [
-    `${clean}${providerName ? ` from ${providerName}` : ''} is available on Swarms Cloud through a single OpenAI-compatible API — no separate provider account or API key required.`,
+    `${clean}${providerName ? ` from ${providerName}` : ''} is available on Swarms Cloud through our Agent Completions API, no separate provider account or API key required.`,
     `Run it as a standalone agent with the Agent Completions API, enable tools, structured outputs, and autonomous loops, or orchestrate it inside multi-agent swarms alongside models from other providers.`,
     vision
       ? `${clean} also supports vision tasks: pass base64-encoded images and it can analyze, describe, and answer questions about them.`

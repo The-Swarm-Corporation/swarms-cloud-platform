@@ -12,6 +12,7 @@ import {
   XCircle,
   Copy,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 
 type ModelEntry = {
@@ -256,6 +257,76 @@ export default function ModelsPage() {
   );
 }
 
+type ExampleLang = 'python' | 'typescript' | 'curl';
+
+const EXAMPLE_LANGS: { key: ExampleLang; label: string }[] = [
+  { key: 'python', label: 'Python' },
+  { key: 'typescript', label: 'TypeScript' },
+  { key: 'curl', label: 'cURL' },
+];
+
+function buildExamplePayload(modelName: string) {
+  return {
+    agent_config: {
+      agent_name: 'Research Analyst',
+      description: 'Expert in analyzing and synthesizing research data',
+      system_prompt:
+        'You are a Research Analyst with expertise in data analysis and synthesis.',
+      model_name: modelName,
+      max_loops: 1,
+      max_tokens: 8192,
+      temperature: 0.5,
+    },
+    task: 'Analyze the impact of artificial intelligence on healthcare',
+  };
+}
+
+function buildAgentExample(modelName: string, lang: ExampleLang): string {
+  const payload = buildExamplePayload(modelName);
+  const json = JSON.stringify(payload, null, 4);
+
+  if (lang === 'python') {
+    return [
+      'import requests',
+      '',
+      `payload = ${json}`,
+      '',
+      'response = requests.post(',
+      '    "https://api.swarms.world/v1/agent/completions",',
+      '    headers={"x-api-key": "your-api-key"},',
+      '    json=payload,',
+      ')',
+      '',
+      'print(response.json())',
+    ].join('\n');
+  }
+
+  if (lang === 'typescript') {
+    return [
+      `const payload = ${json};`,
+      '',
+      "const response = await fetch('https://api.swarms.world/v1/agent/completions', {",
+      "  method: 'POST',",
+      '  headers: {',
+      "    'Content-Type': 'application/json',",
+      "    'x-api-key': 'your-api-key',",
+      '  },',
+      '  body: JSON.stringify(payload),',
+      '});',
+      '',
+      'const result = await response.json();',
+      'console.log(result);',
+    ].join('\n');
+  }
+
+  return [
+    'curl -X POST "https://api.swarms.world/v1/agent/completions" \\',
+    '  -H "Content-Type: application/json" \\',
+    '  -H "x-api-key: your-api-key" \\',
+    `  -d '${JSON.stringify(payload, null, 2)}'`,
+  ].join('\n');
+}
+
 function ModelCard({
   entry,
   onCopy,
@@ -265,6 +336,10 @@ function ModelCard({
   onCopy: (id: string) => void;
   copied: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const [exampleCopied, setExampleCopied] = useState(false);
+  const [lang, setLang] = useState<ExampleLang>('python');
+
   const meta =
     entry.raw && typeof entry.raw === 'object'
       ? (entry.raw as Record<string, unknown>)
@@ -280,9 +355,34 @@ function ModelCard({
         : null)) ||
     null;
 
+  const modelName =
+    (meta && typeof meta.model === 'string' && meta.model) ||
+    (meta && typeof meta.model_name === 'string' && meta.model_name) ||
+    entry.id;
+  const example = useMemo(
+    () => buildAgentExample(modelName, lang),
+    [modelName, lang]
+  );
+
+  const handleCopyExample = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(example);
+      setExampleCopied(true);
+      setTimeout(() => setExampleCopied(false), 1200);
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <div className="rounded-lg border border-border bg-card p-4 flex flex-col gap-3 transition-colors hover:border-border-strong">
-      <div className="flex items-start justify-between gap-2 min-w-0">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex items-start justify-between gap-2 min-w-0 text-left cursor-pointer bg-transparent border-0 p-0"
+      >
         <div className="flex items-start gap-2 min-w-0">
           <div className="w-7 h-7 rounded-md bg-subtle border border-border flex items-center justify-center flex-shrink-0">
             <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
@@ -298,25 +398,102 @@ function ModelCard({
             )}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => onCopy(entry.id)}
-          className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
-          aria-label="Copy model id"
-          title="Copy model id"
-        >
-          {copied ? (
-            <Check className="w-3.5 h-3.5 text-success" />
-          ) : (
-            <Copy className="w-3.5 h-3.5" />
-          )}
-        </button>
-      </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopy(entry.id);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                onCopy(entry.id);
+              }
+            }}
+            className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            aria-label="Copy model id"
+            title="Copy model id"
+          >
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-success" />
+            ) : (
+              <Copy className="w-3.5 h-3.5" />
+            )}
+          </span>
+          <span
+            className="inline-flex items-center justify-center w-7 h-7 text-muted-foreground"
+            aria-hidden="true"
+          >
+            <ChevronDown
+              className={`w-3.5 h-3.5 transition-transform ${
+                expanded ? 'rotate-180' : ''
+              }`}
+            />
+          </span>
+        </div>
+      </button>
 
       {description && (
         <p className="text-xs text-muted-foreground line-clamp-3">
           {description}
         </p>
+      )}
+
+      {expanded && (
+        <div className="text-xs">
+          <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+            <span className="text-muted-foreground truncate">
+              Single agent completion
+            </span>
+            <code className="px-1.5 py-0.5 rounded bg-subtle border border-border text-[10px] text-muted-foreground flex-shrink-0">
+              POST /v1/agent/completions
+            </code>
+          </div>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div
+              role="tablist"
+              aria-label="Example language"
+              className="inline-flex items-center rounded-md border border-border bg-subtle p-0.5"
+            >
+              {EXAMPLE_LANGS.map((l) => (
+                <button
+                  key={l.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={lang === l.key}
+                  onClick={() => setLang(l.key)}
+                  className={`px-2 h-6 rounded text-[11px] transition-colors ${
+                    lang === l.key
+                      ? 'bg-card text-foreground border border-border shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyExample}
+              className="inline-flex items-center gap-1 px-2 h-6 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0"
+              aria-label="Copy example code"
+              title="Copy example code"
+            >
+              {exampleCopied ? (
+                <Check className="w-3 h-3 text-success" />
+              ) : (
+                <Copy className="w-3 h-3" />
+              )}
+              {exampleCopied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <pre className="p-2 rounded-md bg-subtle border border-border overflow-x-auto text-[11px] leading-relaxed text-foreground">
+            {example}
+          </pre>
+        </div>
       )}
 
       {meta && (

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
-import { JsonLd } from '@/components/seo/JsonLd';
+import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
   title: 'AI Model Catalog — GPT, Claude, Gemini, Llama & More',
@@ -37,10 +36,8 @@ export default function ModelsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <JsonLd data={pageBreadcrumbJsonLd('Models', '/models')} />
-      {children}
-    </>
-  );
+  // Breadcrumb JSON-LD is emitted per page: the list page emits the
+  // two-level trail and each model detail page emits its own three-level
+  // trail, so the layout must not add one of its own.
+  return <>{children}</>;
 }

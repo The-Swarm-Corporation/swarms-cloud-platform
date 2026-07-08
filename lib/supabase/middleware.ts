@@ -13,6 +13,9 @@ const PUBLIC_PATH_PREFIXES = [
   '/terms',
   '/privacy',
   '/learn-more',
+  // Model catalog pages are public for SEO: they are statically generated,
+  // listed in the sitemap, and must be crawlable without a session.
+  '/models',
 ];
 
 function isPublicPath(pathname: string): boolean {

@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/lib/seo';
+import { modelHref } from '@/lib/models/catalog';
+import { getSitemapModelIds } from '@/lib/models/server-catalog';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const routes: Array<{
@@ -29,10 +31,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  return routes.map((r) => ({
+  const staticEntries = routes.map((r) => ({
     url: `${SITE.url}${r.path}`,
     lastModified: now,
     changeFrequency: r.changeFrequency,
     priority: r.priority,
   }));
+
+  const modelIds = await getSitemapModelIds();
+  const modelEntries = modelIds.map((id) => ({
+    url: `${SITE.url}${modelHref(id)}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticEntries, ...modelEntries];
 }

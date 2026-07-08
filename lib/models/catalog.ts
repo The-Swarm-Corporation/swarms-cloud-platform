@@ -177,6 +177,266 @@ export function modelHref(id: string): string {
   return `/models/${id.split('/').map(encodeURIComponent).join('/')}`;
 }
 
+/**
+ * Popular models, used for static generation, sitemap fallback, and as a
+ * recommendation tie-breaker.
+ */
+export const POPULAR_MODEL_IDS: readonly string[] = [
+  'gpt-4.1',
+  'gpt-4.1-mini',
+  'gpt-4.1-nano',
+  'gpt-4o',
+  'gpt-4o-mini',
+  'o3',
+  'o3-mini',
+  'o4-mini',
+  'claude-opus-4-1',
+  'claude-sonnet-4-20250514',
+  'claude-3-7-sonnet-latest',
+  'claude-3-5-haiku-latest',
+  'gemini-2.5-pro',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'deepseek-chat',
+  'deepseek-reasoner',
+  'groq/llama-3.3-70b-versatile',
+  'groq/llama-3.1-8b-instant',
+  'mistral/mistral-large-latest',
+  'mistral/mistral-small-latest',
+  'xai/grok-4',
+  'xai/grok-3-mini',
+];
+
+/** Brand color + monogram per provider for badges; Cpu icon is the fallback. */
+const PROVIDER_VISUALS: Record<string, { monogram: string; color: string }> = {
+  openai: { monogram: 'OA', color: '#10a37f' },
+  anthropic: { monogram: 'A', color: '#d97757' },
+  google: { monogram: 'G', color: '#4285f4' },
+  gemini: { monogram: 'G', color: '#4285f4' },
+  meta: { monogram: 'M', color: '#0668e1' },
+  'meta-llama': { monogram: 'M', color: '#0668e1' },
+  mistral: { monogram: 'Mi', color: '#fa5111' },
+  mistralai: { monogram: 'Mi', color: '#fa5111' },
+  deepseek: { monogram: 'DS', color: '#4d6bfe' },
+  xai: { monogram: 'X', color: '#9ca3af' },
+  'x-ai': { monogram: 'X', color: '#9ca3af' },
+  groq: { monogram: 'Gq', color: '#f55036' },
+  cohere: { monogram: 'Co', color: '#39594d' },
+  qwen: { monogram: 'Q', color: '#6157ff' },
+  perplexity: { monogram: 'P', color: '#20b8cd' },
+  nvidia: { monogram: 'NV', color: '#76b900' },
+  microsoft: { monogram: 'MS', color: '#0078d4' },
+  amazon: { monogram: 'AZ', color: '#ff9900' },
+  bedrock: { monogram: 'BR', color: '#ff9900' },
+  azure: { monogram: 'Az', color: '#0078d4' },
+  together: { monogram: 'T', color: '#0f6fff' },
+  together_ai: { monogram: 'T', color: '#0f6fff' },
+  fireworks: { monogram: 'FW', color: '#7c3aed' },
+  fireworks_ai: { monogram: 'FW', color: '#7c3aed' },
+  openrouter: { monogram: 'OR', color: '#8b5cf6' },
+  ollama: { monogram: 'Ol', color: '#94a3b8' },
+  huggingface: { monogram: 'HF', color: '#ffb000' },
+};
+
+/**
+ * Provider inferred from an entry's metadata or id prefix, or by matching
+ * well-known model-name prefixes for bare ids like "gpt-4.1".
+ */
+export function entryProvider(entry: ModelEntry): string | null {
+  const meta =
+    entry.raw && typeof entry.raw === 'object'
+      ? (entry.raw as Record<string, unknown>)
+      : null;
+  const explicit =
+    (meta && typeof meta.provider === 'string' && meta.provider) ||
+    splitModelId(entry.id).provider;
+  if (explicit) return explicit;
+
+  const bare = entry.id.toLowerCase();
+  if (/^(gpt|o[1-9]|chatgpt|davinci|dall-e|whisper|omni)/.test(bare))
+    return 'openai';
+  if (bare.startsWith('claude')) return 'anthropic';
+  if (bare.startsWith('gemini') || bare.startsWith('gemma')) return 'google';
+  if (bare.startsWith('llama')) return 'meta';
+  if (bare.startsWith('mistral') || bare.startsWith('mixtral'))
+    return 'mistral';
+  if (bare.startsWith('deepseek')) return 'deepseek';
+  if (bare.startsWith('grok')) return 'xai';
+  if (bare.startsWith('qwen') || bare.startsWith('qwq')) return 'qwen';
+  if (bare.startsWith('command')) return 'cohere';
+  if (bare.startsWith('sonar')) return 'perplexity';
+  return null;
+}
+
+export function providerVisual(provider: string | null): {
+  label: string;
+  monogram: string;
+  color: string;
+} | null {
+  if (!provider) return null;
+  const visual = PROVIDER_VISUALS[provider.toLowerCase()];
+  if (!visual) {
+    return {
+      label: providerLabel(provider),
+      monogram: provider.slice(0, 2).toUpperCase(),
+      color: '#94a3b8',
+    };
+  }
+  return { label: providerLabel(provider), ...visual };
+}
+
+const VISION_PATTERNS =
+  /gpt-4o|gpt-4\.1|gpt-5|o[34]|omni|claude|gemini|vision|-vl|vl-|pixtral|llava|grok-[4-9]|multimodal/i;
+
+/** Heuristic capability detection from the model name. */
+export function detectCapabilities(modelName: string): { vision: boolean } {
+  return { vision: VISION_PATTERNS.test(modelName) };
+}
+
+export type ExampleVariant = 'basic' | 'vision' | 'autonomous' | 'streaming';
+
+export function exampleVariantsFor(modelName: string): {
+  key: ExampleVariant;
+  label: string;
+}[] {
+  const variants: { key: ExampleVariant; label: string }[] = [
+    { key: 'basic', label: 'Basic' },
+  ];
+  if (detectCapabilities(modelName).vision) {
+    variants.push({ key: 'vision', label: 'Vision' });
+  }
+  variants.push(
+    { key: 'autonomous', label: 'Autonomous' },
+    { key: 'streaming', label: 'Streaming' }
+  );
+  return variants;
+}
+
+export function buildAgentPayloadVariant(
+  modelName: string,
+  variant: ExampleVariant
+) {
+  const base = buildSingleAgentPayload(modelName);
+  switch (variant) {
+    case 'vision':
+      return {
+        agent_config: {
+          ...base.agent_config,
+          agent_name: 'Image Analyst',
+          description: 'Analyzes images and answers questions about them',
+          system_prompt:
+            'You are an expert at analyzing and describing images in detail.',
+        },
+        task: 'Describe what you see in this image in detail',
+        img: '<base64-encoded image>',
+      };
+    case 'autonomous':
+      return {
+        agent_config: {
+          ...base.agent_config,
+          agent_name: 'Autonomous Researcher',
+          description: 'Plans and executes multi-step tasks on its own',
+          system_prompt:
+            'You are an autonomous agent. Break the task into steps, use your tools, and decide when the task is complete.',
+          max_loops: 'auto',
+        },
+        task: 'Research the current state of renewable energy, identify the top 3 challenges, and propose a solution for each',
+      };
+    case 'streaming':
+      return {
+        agent_config: {
+          ...base.agent_config,
+          streaming_on: true,
+        },
+        task: base.task,
+      };
+    default:
+      return base;
+  }
+}
+
+/**
+ * Deterministic recommendations: same family (bare-name prefix relation)
+ * first, then same provider, then popular models; alphabetical tie-break.
+ */
+export function rankRecommendations(
+  catalog: ModelEntry[],
+  modelId: string,
+  count = 3
+): ModelEntry[] {
+  const currentBare = splitModelId(modelId).name.toLowerCase();
+  const currentProvider = entryProvider({
+    id: modelId,
+    raw: null,
+    searchText: '',
+  });
+  const popular = new Set(POPULAR_MODEL_IDS.map((id) => id.toLowerCase()));
+
+  const seen = new Set<string>();
+  const scored: { entry: ModelEntry; score: number }[] = [];
+  for (const entry of catalog) {
+    if (entry.id === modelId) continue;
+    const name = entryModelName(entry);
+    if (name === modelId || seen.has(name)) continue;
+    seen.add(name);
+
+    const bare = splitModelId(entry.id).name.toLowerCase();
+    let score = 0;
+    if (
+      bare.length >= 3 &&
+      currentBare.length >= 3 &&
+      (bare.startsWith(currentBare) || currentBare.startsWith(bare))
+    ) {
+      score += 4;
+    }
+    const provider = entryProvider(entry);
+    if (
+      provider &&
+      currentProvider &&
+      provider.toLowerCase() === currentProvider.toLowerCase()
+    ) {
+      score += 2;
+    }
+    if (popular.has(entry.id.toLowerCase()) || popular.has(bare)) {
+      score += 1;
+    }
+    scored.push({ entry, score });
+  }
+
+  scored.sort(
+    (a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id)
+  );
+  return scored.slice(0, count).map((s) => s.entry);
+}
+
+export type ModelFaq = { question: string; answer: string };
+
+export function buildModelFaqs(modelId: string): ModelFaq[] {
+  const clean = cleanModelName(splitModelId(modelId).name);
+  const { provider } = splitModelId(modelId);
+  const providerName = provider ? providerLabel(provider) : null;
+  return [
+    {
+      question: `How do I use ${clean} with the Swarms API?`,
+      answer: `Set your SWARMS_API_KEY environment variable, then send a POST request to /v1/agent/completions with agent_config.model_name set to "${modelId}". The API works from Python, TypeScript, cURL, or any HTTP client.`,
+    },
+    {
+      question: `Can I use ${clean} in a multi-agent swarm?`,
+      answer: `Yes. Pass "${modelId}" as the model_name of any agent in a POST to /v1/swarm/completions. You can mix it with other models across 17+ swarm architectures such as SequentialWorkflow, ConcurrentWorkflow, and HierarchicalSwarm.`,
+    },
+    {
+      question: `How is ${clean} billed on Swarms Cloud?`,
+      answer: `Usage is billed per input and output token. See the Swarms Cloud pricing page for the token cost calculator and current rates.`,
+    },
+    {
+      question: providerName
+        ? `Do I need a separate ${providerName} API key to use ${clean}?`
+        : `Do I need a separate provider API key to use ${clean}?`,
+      answer: `No. A single Swarms API key gives you access to every model in the catalog through one OpenAI-compatible API — no separate provider accounts required.`,
+    },
+  ];
+}
+
 export function buildSingleAgentPayload(modelName: string) {
   return {
     agent_config: {

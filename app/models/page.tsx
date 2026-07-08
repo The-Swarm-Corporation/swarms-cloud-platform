@@ -9,10 +9,15 @@ import { apiFetch } from '@/lib/api/client-fetch';
 import {
   flattenModels,
   entryModelName,
+  entryProvider,
   displayModelName,
+  providerLabel,
   modelHref,
   type ModelEntry,
 } from '@/lib/models/catalog';
+import { ProviderBadge } from '@/components/models/ProviderBadge';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { pageBreadcrumbJsonLd } from '@/lib/seo';
 import {
   Cpu,
   Loader2,
@@ -28,6 +33,7 @@ export default function ModelsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [providerFilter, setProviderFilter] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -58,13 +64,31 @@ export default function ModelsPage() {
   }, []);
 
   const models = useMemo(() => flattenModels(raw), [raw]);
+
+  const providerFacets = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const m of models) {
+      const p = entryProvider(m)?.toLowerCase();
+      if (p) counts.set(p, (counts.get(p) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 12);
+  }, [models]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return models;
-    return models.filter(
-      (m) => m.id.toLowerCase().includes(q) || m.searchText.includes(q)
-    );
-  }, [models, query]);
+    return models.filter((m) => {
+      if (
+        providerFilter &&
+        entryProvider(m)?.toLowerCase() !== providerFilter
+      ) {
+        return false;
+      }
+      if (!q) return true;
+      return m.id.toLowerCase().includes(q) || m.searchText.includes(q);
+    });
+  }, [models, query, providerFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const paginated = useMemo(() => {
@@ -74,7 +98,7 @@ export default function ModelsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [query, itemsPerPage]);
+  }, [query, providerFilter, itemsPerPage]);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -92,6 +116,7 @@ export default function ModelsPage() {
 
   return (
     <div className="page-wrapper">
+      <JsonLd data={pageBreadcrumbJsonLd('Models', '/models')} />
       <Navbar />
 
       <main className="page-main px-4 sm:px-6 lg:px-8 py-6 lg:py-8 box-border">
@@ -133,6 +158,41 @@ export default function ModelsPage() {
               </button>
             </div>
           </div>
+
+          {providerFacets.length > 1 && (
+            <div className="flex items-center gap-1.5 mb-5 overflow-x-auto pb-1 -mx-1 px-1">
+              <button
+                type="button"
+                onClick={() => setProviderFilter(null)}
+                className={`px-2.5 h-7 rounded-full border text-xs whitespace-nowrap transition-colors flex-shrink-0 ${
+                  providerFilter === null
+                    ? 'border-foreground bg-foreground text-background'
+                    : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                All
+              </button>
+              {providerFacets.map(([provider, count]) => (
+                <button
+                  key={provider}
+                  type="button"
+                  onClick={() =>
+                    setProviderFilter((cur) =>
+                      cur === provider ? null : provider
+                    )
+                  }
+                  className={`px-2.5 h-7 rounded-full border text-xs whitespace-nowrap transition-colors flex-shrink-0 inline-flex items-center gap-1.5 ${
+                    providerFilter === provider
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {providerLabel(provider)}
+                  <span className="tabular-nums opacity-70">{count}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {loading && !raw ? (
             <div className="rounded-lg border border-border bg-card p-10 text-center">
@@ -225,9 +285,7 @@ function ModelCard({
     >
       <div className="flex items-start justify-between gap-2 min-w-0">
         <div className="flex items-start gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-md bg-subtle border border-border flex items-center justify-center flex-shrink-0">
-            <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
-          </div>
+          <ProviderBadge provider={entryProvider(entry)} />
           <div className="min-w-0">
             <div className="text-sm font-medium text-foreground truncate">
               {displayModelName(entry.id)}

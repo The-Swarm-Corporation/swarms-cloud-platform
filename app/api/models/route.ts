@@ -13,6 +13,32 @@ type CacheEntry = {
 
 const cache = new Map<string, CacheEntry>();
 
+/**
+ * Whether an upstream failure is worth one retry. Covers 5xx/network errors
+ * and the key-verification service's transient hiccup, which surfaces as a
+ * 403 whose message says "unexpected error ... try again" — distinct from a
+ * definitive invalid/expired-key rejection.
+ */
+function isTransientUpstreamError(error: unknown): boolean {
+  const e = error as { status?: number; message?: string } | null;
+  const status = e?.status;
+  if (status === undefined || status === 0 || status >= 500) return true;
+  if (status === 403 && /unexpected error|try again/i.test(e?.message ?? '')) {
+    return true;
+  }
+  return false;
+}
+
+async function fetchModelsWithRetry(client: SwarmsAPIClient) {
+  try {
+    return await client.getAvailableModels();
+  } catch (error) {
+    if (!isTransientUpstreamError(error)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return client.getAvailableModels();
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const apiKey = await resolveApiKey();
@@ -42,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     const client = new SwarmsAPIClient(apiKey, process.env.SWARMS_API_BASE_URL);
-    const data = await client.getAvailableModels();
+    const data = await fetchModelsWithRetry(client);
 
     cache.set(cacheKey, { data, expiresAt: now + TEN_HOURS_MS });
 

@@ -27,20 +27,30 @@ export async function getServerCatalog(): Promise<ModelEntry[]> {
 
   const baseURL = process.env.SWARMS_API_BASE_URL || 'https://api.swarms.world';
 
-  try {
-    const res = await fetch(`${baseURL}/v1/models/available`, {
-      method: 'GET',
-      headers: { 'x-api-key': apiKey },
-      next: { revalidate: 36000 },
-    });
-    if (!res.ok) return [];
-    const data = (await res.json()) as { models?: unknown };
-    const entries = flattenModels(data?.models ?? data);
-    cached = { entries, expiresAt: now + CACHE_TTL_MS };
-    return entries;
-  } catch {
-    return [];
+  // One retry for transient upstream failures (network errors, 5xx, or the
+  // key-verification service's flaky 403) so sitemap/metadata enrichment
+  // doesn't silently degrade on a single hiccup.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${baseURL}/v1/models/available`, {
+        method: 'GET',
+        headers: { 'x-api-key': apiKey },
+        next: { revalidate: 36000 },
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { models?: unknown };
+        const entries = flattenModels(data?.models ?? data);
+        cached = { entries, expiresAt: now + CACHE_TTL_MS };
+        return entries;
+      }
+    } catch {
+      // fall through to retry / empty result
+    }
+    if (attempt === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
   }
+  return [];
 }
 
 /**

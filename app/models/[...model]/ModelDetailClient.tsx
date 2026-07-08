@@ -18,6 +18,7 @@ import {
   buildAgentPayloadVariant,
   buildSwarmPayload,
   buildModelFaqs,
+  modelOverview,
   exampleVariantsFor,
   rankRecommendations,
   type ExampleVariant,
@@ -204,11 +205,9 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
                   </code>
                   <CopyButton text={modelName} label="Copy model name" />
                 </div>
-                {description && (
-                  <p className="text-sm text-muted-foreground mt-3 max-w-2xl">
-                    {description}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground mt-3 max-w-2xl">
+                  {description ?? modelOverview(modelId)}
+                </p>
               </div>
             </div>
             <Link

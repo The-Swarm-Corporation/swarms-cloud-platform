@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 import {
-  displayModelName,
+  cleanModelName,
   splitModelId,
-  providerLabel,
+  providerVisual,
 } from '@/lib/models/catalog';
 
 export const runtime = 'edge';
@@ -12,16 +12,19 @@ const SIZE = { width: 1200, height: 630 };
 
 /**
  * Open Graph image for model detail pages: /api/og/model?id=<model-id>.
- * Lives outside /models/[...model] because a file convention there would
- * create a segment after the catch-all, which the router rejects.
+ * This is what renders when a model link is shared on Slack, Twitter/X,
+ * Discord, LinkedIn, iMessage, etc. Lives outside /models/[...model]
+ * because a file convention there would create a segment after the
+ * catch-all, which the router rejects.
  */
 export async function GET(request: NextRequest) {
   const modelId = request.nextUrl.searchParams.get('id')?.slice(0, 100) || '';
-  const displayName = modelId ? displayModelName(modelId) : 'Model Catalog';
-  const { provider } = modelId
+  const { provider, name } = modelId
     ? splitModelId(modelId)
-    : { provider: null as string | null };
-  const providerName = provider ? providerLabel(provider) : null;
+    : { provider: null as string | null, name: '' };
+  const clean = modelId ? cleanModelName(name) : 'Model Catalog';
+  const visual = providerVisual(provider);
+  const accent = visual?.color ?? '#EE0712';
 
   return new ImageResponse(
     (
@@ -30,66 +33,121 @@ export async function GET(request: NextRequest) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
           backgroundColor: '#09090b',
-          padding: 72,
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 9999,
-              backgroundColor: '#EE0712',
-            }}
-          />
-          <div style={{ color: '#a1a1aa', fontSize: 32 }}>Swarms Cloud</div>
-        </div>
+        {/* Accent rail in the provider's brand color */}
+        <div style={{ width: 14, height: '100%', backgroundColor: accent }} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {providerName && (
-            <div
-              style={{
-                color: '#a1a1aa',
-                fontSize: 30,
-                textTransform: 'uppercase',
-                letterSpacing: 4,
-              }}
-            >
-              {providerName}
-            </div>
-          )}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: 64,
+          }}
+        >
           <div
             style={{
-              color: '#fafafa',
-              fontSize: displayName.length > 32 ? 56 : 76,
-              fontWeight: 700,
-              lineHeight: 1.1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
           >
-            {displayName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div
+                style={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: 9999,
+                  backgroundColor: '#EE0712',
+                }}
+              />
+              <div style={{ color: '#a1a1aa', fontSize: 30 }}>
+                Swarms Cloud
+              </div>
+            </div>
+            {visual && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: '10px 22px',
+                  borderRadius: 9999,
+                  border: `2px solid ${accent}55`,
+                  backgroundColor: `${accent}1a`,
+                }}
+              >
+                <div
+                  style={{
+                    color: accent,
+                    fontSize: 26,
+                    fontWeight: 700,
+                  }}
+                >
+                  {visual.label}
+                </div>
+              </div>
+            )}
           </div>
-          {modelId && (
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div
               style={{
-                color: '#71717a',
-                fontSize: 30,
-                fontFamily: 'monospace',
+                color: '#fafafa',
+                fontSize:
+                  clean.length > 28 ? 54 : clean.length > 18 ? 66 : 80,
+                fontWeight: 700,
+                lineHeight: 1.05,
               }}
             >
-              {modelId}
+              {clean}
             </div>
-          )}
-        </div>
+            {modelId && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignSelf: 'flex-start',
+                  padding: '10px 18px',
+                  borderRadius: 12,
+                  backgroundColor: '#18181b',
+                  border: '1px solid #27272a',
+                  color: '#a1a1aa',
+                  fontSize: 28,
+                  fontFamily: 'monospace',
+                }}
+              >
+                {modelId}
+              </div>
+            )}
+          </div>
 
-        <div style={{ color: '#a1a1aa', fontSize: 28 }}>
-          API quickstart · Single agents · Multi-agent swarms
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ color: '#a1a1aa', fontSize: 26 }}>
+              API quickstart · Single agents · Multi-agent swarms
+            </div>
+            <div style={{ color: '#52525b', fontSize: 26 }}>
+              swarms.ai/models
+            </div>
+          </div>
         </div>
       </div>
     ),
-    SIZE
+    {
+      ...SIZE,
+      headers: {
+        'Cache-Control':
+          'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+      },
+    }
   );
 }

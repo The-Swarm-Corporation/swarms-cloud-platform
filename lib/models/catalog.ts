@@ -137,13 +137,23 @@ function titleToken(token: string): string {
   return token.charAt(0).toUpperCase() + token.slice(1);
 }
 
-/** "gpt-4.1-mini" → "GPT 4.1 Mini" */
+/** "gpt-4.1-mini" → "GPT 4.1 Mini"; "claude-opus-4-1" → "Claude Opus 4.1" */
 export function cleanModelName(name: string): string {
-  return name
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map(titleToken)
-    .join(' ');
+  const tokens = name.split(/[-_\s]+/).filter(Boolean);
+
+  // Re-join dash-separated version parts: ["4", "1"] → "4.1". Only short
+  // numeric continuations qualify so date stamps like "20250514" stay apart.
+  const merged: string[] = [];
+  for (const token of tokens) {
+    const prev = merged[merged.length - 1];
+    if (prev && /^\d+$/.test(prev) && /^\d{1,2}$/.test(token)) {
+      merged[merged.length - 1] = `${prev}.${token}`;
+    } else {
+      merged.push(token);
+    }
+  }
+
+  return merged.map(titleToken).join(' ');
 }
 
 export function providerLabel(provider: string): string {
@@ -407,6 +417,126 @@ export function rankRecommendations(
     (a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id)
   );
   return scored.slice(0, count).map((s) => s.entry);
+}
+
+/**
+ * Search-relevant ways people write this model's name:
+ * "openai/gpt-4.1-mini", "gpt-4.1-mini", "GPT 4.1 Mini", "OpenAI GPT 4.1 Mini".
+ */
+export function modelNameAliases(modelId: string): string[] {
+  const { provider, name } = splitModelId(modelId);
+  const clean = cleanModelName(name);
+  const aliases = new Set<string>([modelId, name, clean]);
+  const spaced = name.replace(/[-_]+/g, ' ');
+  if (spaced !== name) aliases.add(spaced);
+  if (provider) {
+    aliases.add(`${providerLabel(provider)} ${clean}`);
+  }
+  return Array.from(aliases);
+}
+
+const KEYWORD_SUFFIXES_PRIMARY = [
+  'API',
+  'API key',
+  'agents',
+  'agent API',
+  'quickstart',
+  'example',
+  'code example',
+  'Python example',
+  'TypeScript example',
+  'cURL example',
+  'integration',
+  'tutorial',
+  'multi-agent',
+  'swarm',
+  'pricing',
+  'API pricing',
+] as const;
+
+const KEYWORD_SUFFIXES_SECONDARY = ['API', 'agents', 'example'] as const;
+
+/**
+ * Extensive per-model keyword set: every alias crossed with high-intent
+ * suffixes (full matrix for the two primary aliases, a short one for the
+ * rest), plus how-to phrasings and provider terms. Merged with site-wide
+ * keywords by buildMetadata.
+ */
+export function modelKeywords(modelId: string): string[] {
+  const aliases = modelNameAliases(modelId);
+  const { provider, name } = splitModelId(modelId);
+  const clean = cleanModelName(name);
+  const providerName = provider ? providerLabel(provider) : null;
+
+  const keywords = new Set<string>();
+  const [primaryA, primaryB] = [modelId, clean];
+
+  for (const alias of aliases) {
+    keywords.add(alias);
+    const suffixes =
+      alias === primaryA || alias === primaryB
+        ? KEYWORD_SUFFIXES_PRIMARY
+        : KEYWORD_SUFFIXES_SECONDARY;
+    for (const suffix of suffixes) keywords.add(`${alias} ${suffix}`);
+  }
+
+  keywords.add(`run ${modelId}`);
+  keywords.add(`use ${clean} API`);
+  keywords.add(`how to use ${clean}`);
+  keywords.add(`${clean} OpenAI compatible API`);
+  keywords.add(`${clean} REST API`);
+  keywords.add(`best model for AI agents`);
+  if (providerName) {
+    keywords.add(`${providerName} models`);
+    keywords.add(`${providerName} API`);
+    keywords.add(`${providerName} ${clean} API`);
+  }
+
+  return Array.from(keywords).slice(0, 80);
+}
+
+/** SERP title for a model page (brand suffix added by buildMetadata). */
+export function modelSeoTitle(modelId: string): string {
+  return `${displayModelName(modelId)} API — Agents, Quickstart & Examples`;
+}
+
+/**
+ * SERP/OG description; prefers a concise catalog description when given,
+ * otherwise generates a keyword-rich one. Kept under ~170 chars.
+ */
+export function modelSeoDescription(
+  modelId: string,
+  catalogDescription?: string | null
+): string {
+  if (
+    catalogDescription &&
+    catalogDescription.length >= 50 &&
+    catalogDescription.length <= 300
+  ) {
+    return catalogDescription;
+  }
+  const clean = cleanModelName(splitModelId(modelId).name);
+  return `Run ${clean} (${modelId}) through one OpenAI-compatible Swarms API. Copy Python, TypeScript & cURL examples, launch a single agent, and scale to multi-agent swarms.`;
+}
+
+/**
+ * Crawlable overview prose for pages whose catalog entry has no
+ * description; also reused as visible on-page copy.
+ */
+export function modelOverview(modelId: string): string {
+  const { provider, name } = splitModelId(modelId);
+  const clean = cleanModelName(name);
+  const providerName = provider ? providerLabel(provider) : null;
+  const vision = detectCapabilities(modelId).vision;
+  return [
+    `${clean}${providerName ? ` from ${providerName}` : ''} is available on Swarms Cloud through a single OpenAI-compatible API — no separate provider account or API key required.`,
+    `Run it as a standalone agent with the Agent Completions API, enable tools, structured outputs, and autonomous loops, or orchestrate it inside multi-agent swarms alongside models from other providers.`,
+    vision
+      ? `${clean} also supports vision tasks: pass base64-encoded images and it can analyze, describe, and answer questions about them.`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 export type ModelFaq = { question: string; answer: string };

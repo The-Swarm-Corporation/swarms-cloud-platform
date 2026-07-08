@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { buildMetadata, breadcrumbJsonLd } from '@/lib/seo';
+import { buildMetadata, breadcrumbJsonLd, SITE } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 import {
   displayModelName,
@@ -7,6 +7,9 @@ import {
   splitModelId,
   providerLabel,
   modelHref,
+  modelKeywords,
+  modelSeoTitle,
+  modelSeoDescription,
   buildModelFaqs,
   POPULAR_MODEL_IDS,
 } from '@/lib/models/catalog';
@@ -27,6 +30,32 @@ function modelIdFromParams(params: Params): string {
   return segments.map((s) => decodeURIComponent(s)).join('/');
 }
 
+function ogImagePath(modelId: string): string {
+  return `/api/og/model?id=${encodeURIComponent(modelId)}`;
+}
+
+async function catalogDescriptionFor(modelId: string): Promise<string | null> {
+  try {
+    const catalog = await getServerCatalog();
+    const entry = catalog.find((m) => m.id === modelId);
+    const meta =
+      entry?.raw && typeof entry.raw === 'object'
+        ? (entry.raw as Record<string, unknown>)
+        : null;
+    return (
+      (meta &&
+        (typeof meta.description === 'string'
+          ? meta.description
+          : typeof meta.summary === 'string'
+          ? meta.summary
+          : null)) ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
 export function generateStaticParams(): Params[] {
   return POPULAR_MODEL_IDS.map((id) => ({ model: id.split('/') }));
 }
@@ -37,57 +66,14 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const modelId = modelIdFromParams(await params);
-  const displayName = displayModelName(modelId);
-  const clean = cleanModelName(splitModelId(modelId).name);
-  const { provider } = splitModelId(modelId);
-  const providerName = provider ? providerLabel(provider) : null;
-
-  // Enrich the description from the live catalog when available.
-  let catalogDescription: string | null = null;
-  try {
-    const catalog = await getServerCatalog();
-    const entry = catalog.find((m) => m.id === modelId);
-    const meta =
-      entry?.raw && typeof entry.raw === 'object'
-        ? (entry.raw as Record<string, unknown>)
-        : null;
-    catalogDescription =
-      (meta &&
-        (typeof meta.description === 'string'
-          ? meta.description
-          : typeof meta.summary === 'string'
-          ? meta.summary
-          : null)) ||
-      null;
-  } catch {
-    // metadata falls back to the generated description
-  }
-
-  const description =
-    catalogDescription && catalogDescription.length <= 300
-      ? catalogDescription
-      : `Run ${modelId} through the Swarms API. Get an API key, copy Python, TypeScript, and cURL quickstart examples, and scale ${clean} from a single agent to a multi-agent swarm.`;
+  const catalogDescription = await catalogDescriptionFor(modelId);
 
   return buildMetadata({
-    title: `${displayName} API — Quickstart & Code Examples`,
-    description,
+    title: modelSeoTitle(modelId),
+    description: modelSeoDescription(modelId, catalogDescription),
     path: modelHref(modelId),
-    ogImage: `/api/og/model?id=${encodeURIComponent(modelId)}`,
-    keywords: [
-      modelId,
-      `${modelId} API`,
-      `${modelId} api key`,
-      `${modelId} example`,
-      `${modelId} agents`,
-      `run ${modelId}`,
-      `${clean} API`,
-      `${clean} agents`,
-      `${clean} multi-agent`,
-      `${clean} quickstart`,
-      ...(providerName
-        ? [`${providerName} models`, `${providerName} API`]
-        : []),
-    ],
+    ogImage: ogImagePath(modelId),
+    keywords: modelKeywords(modelId),
   });
 }
 
@@ -99,8 +85,12 @@ export default async function ModelDetailPage({
   const modelId = modelIdFromParams(await params);
   const displayName = displayModelName(modelId);
   const clean = cleanModelName(splitModelId(modelId).name);
+  const { provider } = splitModelId(modelId);
   const path = modelHref(modelId);
+  const url = `${SITE.url}${path}`;
   const faqs = buildModelFaqs(modelId);
+  const catalogDescription = await catalogDescriptionFor(modelId);
+  const description = modelSeoDescription(modelId, catalogDescription);
 
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -145,6 +135,39 @@ export default async function ModelDetailPage({
     ],
   };
 
+  // The model itself as a product node, linked to Swarms Cloud as provider.
+  const modelJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: displayName,
+    alternateName: modelId,
+    applicationCategory: 'DeveloperApplication',
+    applicationSubCategory: 'Large Language Model',
+    operatingSystem: 'Web',
+    url,
+    image: `${SITE.url}${ogImagePath(modelId)}`,
+    description,
+    ...(provider
+      ? {
+          creator: {
+            '@type': 'Organization',
+            name: providerLabel(provider),
+          },
+        }
+      : {}),
+    provider: {
+      '@type': 'Organization',
+      name: SITE.name,
+      url: SITE.url,
+    },
+    isAccessibleForFree: false,
+    potentialAction: {
+      '@type': 'UseAction',
+      target: `${SITE.url}/playground?model=${encodeURIComponent(modelId)}`,
+      name: `Try ${clean} in the Swarms Playground`,
+    },
+  };
+
   return (
     <>
       <JsonLd
@@ -156,6 +179,7 @@ export default async function ModelDetailPage({
       />
       <JsonLd data={faqJsonLd} />
       <JsonLd data={howToJsonLd} />
+      <JsonLd data={modelJsonLd} />
       <ModelDetailClient modelId={modelId} />
     </>
   );

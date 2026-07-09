@@ -17,6 +17,7 @@ import {
   KeyRound,
   BookOpen,
   Workflow,
+  GitCompare,
 } from 'lucide-react';
 
 export type AppCategory =
@@ -224,6 +225,26 @@ export const APPS: AppEntry[] = [
       'experiment',
     ],
     icon: Sparkles,
+    category: 'build',
+    status: 'live',
+  },
+  {
+    href: '/compare',
+    label: 'Compare',
+    description: 'Run the same task through 2+ agents side by side.',
+    longDescription:
+      'Configure or import 2 to 6 agents, send them the same task, and compare their responses, latency, tokens, and cost side by side.',
+    keywords: [
+      'compare',
+      'comparison',
+      'side by side',
+      'a/b test',
+      'models',
+      'benchmark',
+      'versus',
+      'multiple models',
+    ],
+    icon: GitCompare,
     category: 'build',
     status: 'live',
   },

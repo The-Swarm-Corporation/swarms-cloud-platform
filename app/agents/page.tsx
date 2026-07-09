@@ -17,6 +17,7 @@ import {
   RefreshCw,
   XCircle,
   Download,
+  GitCompare,
 } from 'lucide-react';
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
@@ -185,6 +186,12 @@ export default function AgentsPage() {
                   className="flex-1 min-w-0"
                 />
                 <div className="flex items-center gap-2">
+                  <Link href="/compare">
+                    <Button variant="secondary" size="md">
+                      <GitCompare className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Compare</span>
+                    </Button>
+                  </Link>
                   <Link href="/">
                     <Button variant="primary" size="md">
                       <Plus className="w-3.5 h-3.5" />

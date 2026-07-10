@@ -86,7 +86,7 @@ export function AgentTable({
 
       <div className="rounded-lg border border-border bg-card overflow-hidden w-full max-w-full">
         <div className="overflow-x-auto max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full min-w-[720px]">
+          <table className="w-full min-w-[560px]">
             <thead>
               <tr className="border-b border-border bg-subtle">
                 <th className="px-4 h-10 text-left whitespace-nowrap">
@@ -106,15 +106,6 @@ export function AgentTable({
                 </th>
                 <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden lg:table-cell">
                   Role
-                </th>
-                <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden sm:table-cell">
-                  Temp
-                </th>
-                <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden sm:table-cell">
-                  Loops
-                </th>
-                <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                  Runs
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
@@ -146,21 +137,6 @@ export function AgentTable({
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <div className="text-xs text-muted-foreground">
                       {agent.config.role || 'worker'}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right hidden sm:table-cell">
-                    <div className="font-mono text-xs text-foreground tabular-nums">
-                      {agent.config.temperature || 0.5}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right hidden sm:table-cell">
-                    <div className="font-mono text-xs text-foreground tabular-nums">
-                      {agent.config.max_loops || 1}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right hidden md:table-cell">
-                    <div className="font-mono text-xs text-muted-foreground tabular-nums">
-                      {agent.execution_history.length}
                     </div>
                   </td>
                   <td className="px-3 py-2">

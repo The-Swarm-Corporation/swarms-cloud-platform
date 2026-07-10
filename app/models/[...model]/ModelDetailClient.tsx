@@ -24,11 +24,13 @@ import {
   type ExampleVariant,
   type ModelEntry,
 } from '@/lib/models/catalog';
+import { buildModelDocs } from '@/lib/models/model-docs';
 import {
   ArrowLeft,
   Check,
   Copy,
   Cpu,
+  FileText,
   FlaskConical,
   KeyRound,
   Loader2,
@@ -72,6 +74,40 @@ function CopyButton({
         <Check className="w-3.5 h-3.5 text-success" />
       ) : (
         <Copy className="w-3.5 h-3.5" />
+      )}
+    </button>
+  );
+}
+
+function CopyDocsButton({ docs }: { docs: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(docs);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1.5 justify-center h-9 px-4 text-sm font-medium rounded-md bg-card text-foreground hover:bg-muted active:bg-muted/70 border border-border transition-colors flex-shrink-0"
+      aria-label="Copy the quick-start docs for this model as Markdown"
+      title="Copy the quick-start docs as Markdown"
+    >
+      {copied ? (
+        <>
+          <Check className="w-4 h-4 text-success" />
+          Copied
+        </>
+      ) : (
+        <>
+          <FileText className="w-4 h-4" />
+          Copy Docs
+        </>
       )}
     </button>
   );
@@ -177,6 +213,10 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
   const faqs = useMemo(() => buildModelFaqs(modelId), [modelId]);
 
   const playgroundHref = `/playground?model=${encodeURIComponent(modelName)}`;
+  const docs = useMemo(
+    () => buildModelDocs({ modelId, modelName, description }),
+    [modelId, modelName, description]
+  );
 
   return (
     <div className="page-wrapper">
@@ -210,13 +250,16 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
                 </p>
               </div>
             </div>
-            <Link
-              href={playgroundHref}
-              className="inline-flex items-center gap-1.5 justify-center h-9 px-4 text-sm font-medium rounded-md bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80 border border-foreground transition-colors flex-shrink-0"
-            >
-              <FlaskConical className="w-4 h-4" />
-              Open in Playground
-            </Link>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <CopyDocsButton docs={docs} />
+              <Link
+                href={playgroundHref}
+                className="inline-flex items-center gap-1.5 justify-center h-9 px-4 text-sm font-medium rounded-md bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80 border border-foreground transition-colors flex-shrink-0"
+              >
+                <FlaskConical className="w-4 h-4" />
+                Open in Playground
+              </Link>
+            </div>
           </div>
 
           {loading && catalog.length === 0 && (

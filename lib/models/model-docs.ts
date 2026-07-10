@@ -9,6 +9,10 @@ import { buildSnippet } from '@/lib/api/snippets';
 import { SITE } from '@/lib/seo';
 
 const API_BASE_URL = 'https://api.swarms.world';
+// SITE.url falls back to swarms.ai when NEXT_PUBLIC_SITE_URL isn't set, but
+// this app only ever runs at cloud.swarms.world — hardcode it so the docs
+// links are always correct regardless of env config.
+export const CLOUD_URL = 'https://cloud.swarms.world';
 
 const ENV_SNIPPET = `# .env
 SWARMS_API_KEY="your-api-key"
@@ -22,7 +26,7 @@ function modelPageUrl(modelId: string): string {
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
-  return `${SITE.url}/models/${path}`;
+  return `${CLOUD_URL}/models/${path}`;
 }
 
 /**
@@ -80,7 +84,7 @@ export function buildModelDocs(opts: {
     '',
     '## 1. Get your Swarms API key',
     '',
-    `Create an API key from your Swarms Cloud API keys dashboard: ${SITE.url}/api-keys (or https://swarms.world/platform/api-keys).`,
+    `Create an API key from your Swarms Cloud API keys dashboard: ${CLOUD_URL}/api-keys (or https://swarms.world/platform/api-keys).`,
     '',
     '## 2. Set it in your environment',
     '',

@@ -1,7 +1,18 @@
-import type { NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
+// /models/<id>.md -> serve the model's quick-start docs as raw Markdown, so
+// agents/crawlers can fetch them without a browser (mirrors the "Copy Docs"
+// button on the model page).
+const MODEL_DOCS_MD_RE = /^\/models\/(.+)\.md$/;
+
 export async function middleware(request: NextRequest) {
+  const match = MODEL_DOCS_MD_RE.exec(request.nextUrl.pathname);
+  if (match) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/api/models/docs/${match[1]}`;
+    return NextResponse.rewrite(url);
+  }
   return updateSession(request);
 }
 

@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { SnippetPreview } from '@/components/ui/SnippetPreview';
 import { ProviderBadge } from '@/components/models/ProviderBadge';
 import { apiFetch } from '@/lib/api/client-fetch';
+import { CLOUD_URL } from '@/lib/models/model-docs';
 import {
   flattenModels,
   entryModelName,
@@ -217,6 +218,8 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
     () => buildModelDocs({ modelId, modelName, description }),
     [modelId, modelName, description]
   );
+  const docsMdUrl = `${CLOUD_URL}${modelHref(modelId)}.md`;
+  const docsMdCurl = `curl -s ${docsMdUrl}`;
 
   return (
     <div className="page-wrapper">
@@ -378,6 +381,28 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
                 payload={swarmPayload}
                 title="Multi-agent swarm"
               />
+            </StepCard>
+
+            <StepCard
+              step={5}
+              title="Grab these docs as Markdown"
+              icon={<FileText className="w-4 h-4" />}
+            >
+              <p className="text-sm text-muted-foreground mb-3">
+                This page is also available as a plain Markdown file, no
+                HTML parsing required — handy for pasting into an LLM or
+                letting an agent fetch it directly.
+              </p>
+              <div className="relative">
+                <pre className="p-3 rounded-md bg-subtle border border-border overflow-x-auto text-[12px] leading-relaxed text-foreground font-mono">
+                  {docsMdCurl}
+                </pre>
+                <CopyButton
+                  text={docsMdCurl}
+                  label="Copy curl command"
+                  className="absolute top-2 right-2"
+                />
+              </div>
             </StepCard>
           </div>
 

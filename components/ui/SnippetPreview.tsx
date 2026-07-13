@@ -47,7 +47,7 @@ export function SnippetPreview({
 
   return (
     <div
-      className={`rounded-md border border-border bg-card overflow-hidden ${className}`}
+      className={`rounded-md border border-border bg-card overflow-hidden min-w-0 ${className}`}
     >
       <header className="flex items-center justify-between gap-2 px-3 h-9 border-b border-border bg-subtle/60">
         <div className="flex items-center gap-2 min-w-0">

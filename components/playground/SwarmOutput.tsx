@@ -175,7 +175,7 @@ function OutputBody({ output }: { output: unknown }) {
 
   if (typeof output === 'string') {
     return (
-      <div className="p-4">
+      <div className="p-4 overflow-x-auto">
         <pre className="text-sm text-foreground whitespace-pre-wrap break-words font-mono">
           {output}
         </pre>
@@ -198,7 +198,7 @@ function OutputBody({ output }: { output: unknown }) {
     return (
       <div className="divide-y divide-border">
         {output.map((item, i) => (
-          <div key={i} className="p-4">
+          <div key={i} className="p-4 overflow-x-auto">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
               Item {i + 1}
             </div>

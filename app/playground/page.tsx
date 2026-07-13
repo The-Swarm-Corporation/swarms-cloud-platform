@@ -403,7 +403,7 @@ export default function PlaygroundPage() {
             </div>
 
             {/* RIGHT — output column */}
-            <div className="space-y-5">
+            <div className="space-y-5 min-w-0">
               {isRunning && (
                 <div className="rounded-lg border border-border bg-card p-10 text-center">
                   <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-muted-foreground" />

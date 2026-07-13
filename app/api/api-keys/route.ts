@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { jsonErrorFromUnknown } from '@/lib/api/errors';
+import {
+  ensureApiKeyForUser,
+  generateApiKey,
+} from '@/lib/api/server-api-key';
 
 const NO_STORE = 'private, no-store';
 const MAX_NAME_LENGTH = 100;
@@ -10,11 +13,6 @@ const MAX_NAME_LENGTH = 100;
 function maskKey(key: string | null): string {
   if (!key) return '';
   return `${key.slice(0, 5)}.....${key.slice(-5)}`;
-}
-
-function generateApiKey(): string {
-  // Matches the swarms.world key format: "sk-" + 64 hex chars.
-  return `sk-${crypto.randomBytes(32).toString('hex')}`;
 }
 
 export async function GET(_request: NextRequest) {
@@ -38,6 +36,10 @@ export async function GET(_request: NextRequest) {
         { status: 503, headers: { 'Cache-Control': NO_STORE } },
       );
     }
+
+    // Every signed-in user gets a key auto-created on first use, so the
+    // dashboard works out of the box.
+    await ensureApiKeyForUser(admin, user.id);
 
     // `is_deleted` is nullable with default false; filter "not true" so both
     // false and legacy NULL rows are kept (see lib/api/server-api-key.ts).

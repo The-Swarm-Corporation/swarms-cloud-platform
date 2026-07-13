@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { useApiKeys, type ApiKeyRow } from '@/lib/hooks/useApiKeys';
 import { useUIStore } from '@/lib/store/ui-store';
+import { API_KEY_CREATED_EVENT } from '@/lib/store/onboarding-store';
 import {
   KeyRound,
   Plus,
@@ -75,6 +76,7 @@ export default function ApiKeysPage() {
     try {
       const created = await createKey(name);
       setGeneratedKey(created.key);
+      window.dispatchEvent(new Event(API_KEY_CREATED_EVENT));
       addToast({ type: 'success', message: `API key "${name}" created.` });
     } catch (err) {
       addToast({

@@ -11,6 +11,7 @@ const USER_SCOPED_KEYS = [
   'agent-store', // zustand: created agents + execution history
   'prompt-architect-history', // prompt generator history
   'recentApps', // recently visited apps
+  'onboarding-store', // zustand: first-run wizard progress
 ];
 
 export function clearUserScopedStorage() {

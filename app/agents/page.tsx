@@ -20,14 +20,6 @@ import {
   GitCompare,
 } from 'lucide-react';
 
-const ROLE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'all', label: 'All roles' },
-  { value: 'worker', label: 'Worker' },
-  { value: 'analyst', label: 'Analyst' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'researcher', label: 'Researcher' },
-];
-
 function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
   const id =
     (config as unknown as { id?: string }).id ||
@@ -46,7 +38,6 @@ export default function AgentsPage() {
   const { configs, isLoading, error, refetch } = useAgentConfigsList();
   const [searchQuery, setSearchQuery] = useState('');
   const [modelFilter, setModelFilter] = useState<string>('all');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
@@ -77,17 +68,12 @@ export default function AgentsPage() {
     return agents.filter((agent) => {
       const c = agent.config;
       if (modelFilter !== 'all' && c.model_name !== modelFilter) return false;
-      if (roleFilter !== 'all') {
-        const role = (c.role ?? '').toLowerCase();
-        if (role !== roleFilter.toLowerCase()) return false;
-      }
       if (terms.length === 0) return true;
 
       const haystack = [
         c.agent_name,
         c.description,
         c.model_name,
-        c.role,
         c.system_prompt,
       ]
         .filter(Boolean)
@@ -96,7 +82,7 @@ export default function AgentsPage() {
 
       return terms.every((t) => haystack.includes(t));
     });
-  }, [agents, searchQuery, modelFilter, roleFilter]);
+  }, [agents, searchQuery, modelFilter]);
 
   const paginatedAgents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -105,7 +91,7 @@ export default function AgentsPage() {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, modelFilter, roleFilter]);
+  }, [searchQuery, modelFilter]);
 
   const totalPages = Math.ceil(filteredAgents.length / itemsPerPage);
 
@@ -122,7 +108,6 @@ export default function AgentsPage() {
       'agent_name',
       'description',
       'model_name',
-      'role',
       'temperature',
       'max_loops',
       'max_tokens',
@@ -133,7 +118,6 @@ export default function AgentsPage() {
       a.config.agent_name ?? '',
       a.config.description ?? '',
       a.config.model_name ?? '',
-      a.config.role ?? '',
       a.config.temperature ?? '',
       a.config.max_loops ?? '',
       a.config.max_tokens ?? '',
@@ -144,7 +128,7 @@ export default function AgentsPage() {
   };
 
   const hasActiveFilter =
-    !!searchQuery.trim() || modelFilter !== 'all' || roleFilter !== 'all';
+    !!searchQuery.trim() || modelFilter !== 'all';
 
   return (
     <div className="page-wrapper">
@@ -237,19 +221,12 @@ export default function AgentsPage() {
                     ...availableModels.map((m) => ({ value: m, label: m })),
                   ]}
                 />
-                <FilterSelect
-                  label="Role"
-                  value={roleFilter}
-                  onChange={setRoleFilter}
-                  options={ROLE_OPTIONS}
-                />
                 {hasActiveFilter && (
                   <button
                     type="button"
                     onClick={() => {
                       setSearchQuery('');
                       setModelFilter('all');
-                      setRoleFilter('all');
                     }}
                     className="text-[11px] text-muted-foreground hover:text-foreground underline"
                   >

@@ -9,11 +9,13 @@ import { useProfile, getInitials } from '@/lib/hooks/useProfile';
 import { BillingSection } from '@/components/settings/BillingSection';
 import { signOutAction } from '@/lib/auth/actions';
 import { clearUserScopedStorage } from '@/lib/auth/client-storage';
+import { useOnboardingStore } from '@/lib/store/onboarding-store';
 import {
   Palette,
   Wallet,
   RefreshCw,
   Loader2,
+  Rocket,
   XCircle,
   ExternalLink,
   LogOut,
@@ -26,6 +28,7 @@ export default function SettingsPage() {
   const { profile, isLoading: profileLoading, error: profileError } = useProfile();
 
   const [isSigningOut, startSignOut] = useTransition();
+  const restartOnboarding = useOnboardingStore((s) => s.restart);
 
   const handleSignOut = () => {
     startSignOut(async () => {
@@ -297,6 +300,26 @@ export default function SettingsPage() {
                     {profile?.tier?.trim() || 'Free'}
                   </span>
                 )}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-subtle px-4 py-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Onboarding
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    Re-run the getting-started tour from the beginning.
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={restartOnboarding}
+                  className="flex-shrink-0"
+                >
+                  <Rocket className="w-3.5 h-3.5" />
+                  Restart tour
+                </Button>
               </div>
 
               <Button

@@ -18,10 +18,12 @@ import {
   ArrowRight,
   BookOpen,
   Bot,
+  Boxes,
   Check,
   KeyRound,
   Rocket,
   Terminal,
+  Workflow,
   X,
 } from 'lucide-react';
 
@@ -48,18 +50,45 @@ function isUserCreatedKey(key: ApiKeyRow): boolean {
   return key.name !== AUTO_CREATED_KEY_NAME;
 }
 
-const STEPS: { step: OnboardingStep; title: string; icon: typeof KeyRound }[] =
-  [
-    { step: 1, title: 'Create an API key', icon: KeyRound },
-    { step: 2, title: 'Try the playground', icon: Terminal },
-    { step: 3, title: 'Keep exploring', icon: Rocket },
-  ];
+const STEPS: {
+  step: OnboardingStep;
+  title: string;
+  description: string;
+  icon: typeof KeyRound;
+}[] = [
+  {
+    step: 1,
+    title: 'Create an API key',
+    description:
+      'We made you a "Default" key for the dashboard — create your own to call the Swarms API from your apps.',
+    icon: KeyRound,
+  },
+  {
+    step: 2,
+    title: 'Find your models',
+    description:
+      'Browse the catalog and pick the models your agents will run on.',
+    icon: Boxes,
+  },
+  {
+    step: 3,
+    title: 'Try the playground',
+    description: 'Configure and run your first agent right from the browser.',
+    icon: Terminal,
+  },
+  {
+    step: 4,
+    title: 'Keep exploring',
+    description: 'Discover agents, workflows, and the docs.',
+    icon: Rocket,
+  },
+];
 
 /**
  * Guided first-run flow for accounts with no self-created API key (i.e.
  * first sign-up, or nothing beyond the auto-provisioned "Default" key):
- * welcome modal → create an API key → try the playground → final
- * "keep exploring" modal. Mounted once in the root layout.
+ * welcome modal → create an API key → find your models → try the playground
+ * → final "keep exploring" modal. Mounted once in the root layout.
  */
 export function OnboardingWizard() {
   const hydrated = useIsHydrated();
@@ -154,11 +183,11 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Let&apos;s get you up and running in two quick steps, then we&apos;ll
-            point you at everything else the cloud can do.
+            Let&apos;s get you up and running in a few quick steps, then
+            we&apos;ll point you at everything else the cloud can do.
           </p>
           <ol className="space-y-3">
-            {STEPS.map(({ step: s, title, icon: Icon }) => (
+            {STEPS.map(({ step: s, title, description, icon: Icon }) => (
               <li key={s} className="flex items-center gap-3">
                 <span className="flex-shrink-0 w-7 h-7 rounded-full border border-border bg-subtle flex items-center justify-center">
                   <Icon className="w-3.5 h-3.5 text-muted-foreground" />
@@ -167,14 +196,7 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
                   <p className="text-sm font-medium text-foreground">
                     {title}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {s === 1 &&
-                      'We made you a "Default" key for the dashboard — create your own to call the Swarms API from your apps.'}
-                    {s === 2 &&
-                      'Configure and run your first agent right from the browser.'}
-                    {s === 3 &&
-                      'Discover models, marketplace apps, and the docs.'}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{description}</p>
                 </div>
               </li>
             ))}
@@ -182,21 +204,20 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
         </div>
       </Modal>
 
-      {/* Steps 1–2: compact progress card */}
-      {welcomeSeen && (step === 1 || step === 2) && (
+      {/* Steps 1–3: compact progress card */}
+      {welcomeSeen && step < 4 && (
         <StepCard
           step={step}
           pathname={pathname}
           onDismiss={dismiss}
-          onGoToApiKeys={() => router.push('/api-keys')}
-          onGoToPlayground={() => router.push('/playground')}
-          onFinish={() => advance(3)}
+          onNavigate={(path) => router.push(path)}
+          onAdvance={advance}
         />
       )}
 
-      {/* Step 3: final modal */}
+      {/* Step 4: final modal */}
       <Modal
-        isOpen={step === 3}
+        isOpen={step === 4}
         onClose={complete}
         title="You're all set"
         footer={
@@ -224,6 +245,10 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
             </p>
             <p className="flex items-center gap-2 text-sm text-foreground">
               <Check className="w-4 h-4 text-success flex-shrink-0" />
+              Models discovered
+            </p>
+            <p className="flex items-center gap-2 text-sm text-foreground">
+              <Check className="w-4 h-4 text-success flex-shrink-0" />
               Playground explored
             </p>
           </div>
@@ -242,12 +267,12 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
               }}
             />
             <ExploreLink
-              icon={Terminal}
-              title="Browse the model catalog"
-              description="Every model available through the Swarms API, with pricing."
+              icon={Workflow}
+              title="Design multi-agent workflows"
+              description="Chain agents together visually in the workflow builder."
               onClick={() => {
                 complete();
-                router.push('/models');
+                router.push('/workflow-builder');
               }}
             />
             <ExploreLink
@@ -300,23 +325,75 @@ function KeyCreationWatcher({ pathname }: { pathname: string }) {
   return null;
 }
 
+/**
+ * Per-step card content: what to say, and the primary action. Steps 2 and 3
+ * advance manually once the user is on the destination page; step 1 advances
+ * automatically when a key is created (see KeyCreationWatcher).
+ */
+function stepCardContent(
+  step: OnboardingStep,
+  pathname: string,
+): {
+  title: string;
+  body: string;
+  action?: { label: string; icon: typeof KeyRound; run: 'navigate' | 'advance'; to: string | OnboardingStep };
+} {
+  if (step === 1) {
+    if (pathname === '/api-keys') {
+      return {
+        title: 'Create your API key',
+        body: 'Use the "Create key" button above and copy your new key — we’ll move on automatically once it’s made.',
+      };
+    }
+    return {
+      title: 'Create your API key',
+      body: 'Head to the API keys page to create a key you can use from your own apps.',
+      action: { label: 'Go to API keys', icon: KeyRound, run: 'navigate', to: '/api-keys' },
+    };
+  }
+  if (step === 2) {
+    if (pathname === '/models' || pathname.startsWith('/models/')) {
+      return {
+        title: 'Find your favorite models',
+        body: 'Browse the catalog and open a few models that fit your use case — your agents can run on any of them.',
+        action: { label: 'Next: the playground', icon: ArrowRight, run: 'advance', to: 3 },
+      };
+    }
+    return {
+      title: 'Key created — nice!',
+      body: 'Next: browse the model catalog and find the models you want your agents to use.',
+      action: { label: 'Browse the models', icon: Boxes, run: 'navigate', to: '/models' },
+    };
+  }
+  if (pathname === '/playground') {
+    return {
+      title: 'Run your first agent',
+      body: 'Pick one of the models you liked, give the agent a task, and run it. Finish the tour whenever you’re ready.',
+      action: { label: 'Finish tour', icon: Check, run: 'advance', to: 4 },
+    };
+  }
+  return {
+    title: 'One last stop',
+    body: 'Next up: the playground, where you can run agents on the models you just found.',
+    action: { label: 'Open the playground', icon: ArrowRight, run: 'navigate', to: '/playground' },
+  };
+}
+
 function StepCard({
   step,
   pathname,
   onDismiss,
-  onGoToApiKeys,
-  onGoToPlayground,
-  onFinish,
+  onNavigate,
+  onAdvance,
 }: {
   step: OnboardingStep;
   pathname: string;
   onDismiss: () => void;
-  onGoToApiKeys: () => void;
-  onGoToPlayground: () => void;
-  onFinish: () => void;
+  onNavigate: (path: string) => void;
+  onAdvance: (step: OnboardingStep) => void;
 }) {
-  const onApiKeysPage = pathname === '/api-keys';
-  const onPlaygroundPage = pathname === '/playground';
+  const { title, body, action } = stepCardContent(step, pathname);
+  const ActionIcon = action?.icon;
 
   return (
     <div
@@ -330,7 +407,7 @@ function StepCard({
     >
       <div className="flex items-center justify-between gap-2 px-4 pt-3">
         <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Getting started · Step {step} of 3
+          Getting started · Step {step} of {STEPS.length}
         </p>
         <button
           type="button"
@@ -355,46 +432,22 @@ function StepCard({
       </div>
 
       <div className="px-4 py-3 space-y-2">
-        {step === 1 ? (
-          <>
-            <p className="text-sm font-medium text-foreground">
-              Create your API key
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {onApiKeysPage
-                ? 'Use the "Create key" button above and copy your new key — we’ll move on automatically once it’s made.'
-                : 'Head to the API keys page to create a key you can use from your own apps.'}
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-sm font-medium text-foreground">
-              {onPlaygroundPage ? 'Run your first agent' : 'Key created — nice!'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {onPlaygroundPage
-                ? 'Pick a model, give the agent a task, and run it. Finish the tour whenever you’re ready.'
-                : 'Next up: the playground, where you can run agents right from the browser.'}
-            </p>
-          </>
-        )}
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">{body}</p>
 
-        {step === 1 && !onApiKeysPage && (
-          <Button variant="primary" size="sm" onClick={onGoToApiKeys} className="w-full">
-            <KeyRound className="w-3.5 h-3.5" />
-            Go to API keys
-          </Button>
-        )}
-        {step === 2 && !onPlaygroundPage && (
-          <Button variant="primary" size="sm" onClick={onGoToPlayground} className="w-full">
-            <ArrowRight className="w-3.5 h-3.5" />
-            Open the playground
-          </Button>
-        )}
-        {step === 2 && onPlaygroundPage && (
-          <Button variant="primary" size="sm" onClick={onFinish} className="w-full">
-            <Check className="w-3.5 h-3.5" />
-            Finish tour
+        {action && ActionIcon && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="w-full"
+            onClick={() =>
+              action.run === 'navigate'
+                ? onNavigate(action.to as string)
+                : onAdvance(action.to as OnboardingStep)
+            }
+          >
+            <ActionIcon className="w-3.5 h-3.5" />
+            {action.label}
           </Button>
         )}
       </div>

@@ -16,8 +16,11 @@ export const API_KEY_CREATED_EVENT = 'swarms:api-key-created';
  */
 export type OnboardingStatus = 'unseen' | 'active' | 'completed' | 'dismissed';
 
-/** 1 = create an API key, 2 = try the playground, 3 = final "keep exploring" modal. */
-export type OnboardingStep = 1 | 2 | 3;
+/**
+ * 1 = create an API key, 2 = find your models, 3 = try the playground,
+ * 4 = final "keep exploring" modal.
+ */
+export type OnboardingStep = 1 | 2 | 3 | 4;
 
 interface OnboardingStore {
   status: OnboardingStatus;
@@ -34,6 +37,8 @@ interface OnboardingStore {
    */
   syncUser: (userId: string) => void;
   start: () => void;
+  /** Re-run the tour from the beginning (settings → "Restart tour"). */
+  restart: () => void;
   /** Advance forward only — late signals can never move the flow backwards. */
   advance: (step: OnboardingStep) => void;
   markWelcomeSeen: () => void;
@@ -57,6 +62,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
         ),
 
       start: () => set({ status: 'active', step: 1, welcomeSeen: false }),
+
+      restart: () => set({ status: 'active', step: 1, welcomeSeen: false }),
 
       advance: (step) =>
         set((state) => (step > state.step ? { step } : state)),

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { Pagination } from '@/components/ui/Pagination';
 import { useApiKeys, type ApiKeyRow } from '@/lib/hooks/useApiKeys';
 import { useUIStore } from '@/lib/store/ui-store';
 import { API_KEY_CREATED_EVENT } from '@/lib/store/onboarding-store';
@@ -39,6 +40,8 @@ export default function ApiKeysPage() {
   const addToast = useUIStore((s) => s.addToast);
 
   const [query, setQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Create flow
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -61,6 +64,20 @@ export default function ApiKeysPage() {
         row.key.toLowerCase().includes(q),
     );
   }, [keys, query]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredKeys.length / itemsPerPage));
+  const paginatedKeys = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredKeys.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredKeys, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const openCreate = () => {
     setKeyName('');
@@ -264,7 +281,7 @@ export default function ApiKeysPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredKeys.map((row) => (
+                    {paginatedKeys.map((row) => (
                       <tr
                         key={row.id}
                         className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
@@ -304,6 +321,22 @@ export default function ApiKeysPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="px-5 py-3 border-t border-border">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredKeys.length}
+                  onItemsPerPageChange={(n) => {
+                    setItemsPerPage(n);
+                    setCurrentPage(1);
+                  }}
+                />
               </div>
             )}
 

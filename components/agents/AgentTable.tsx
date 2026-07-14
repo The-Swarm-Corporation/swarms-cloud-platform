@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useAgents } from '@/lib/hooks/useAgents';
-import { AgentStatusIndicator } from './AgentStatusIndicator';
 import { Agent } from '@/types/agent';
 import { Play, Edit, Trash2, Copy, Plus, ChevronsUpDown, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -24,7 +23,7 @@ export function AgentTable({
 }: AgentTableProps) {
   const { agents: hookAgents, removeAgent, duplicateAgent } = useAgents();
   const agents = providedAgents ?? hookAgents;
-  const [sortBy, setSortBy] = useState<'name' | 'created_at' | 'status'>('created_at');
+  const [sortBy, setSortBy] = useState<'name' | 'created_at'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const sortedAgents = [...agents].sort((a, b) => {
@@ -33,13 +32,11 @@ export function AgentTable({
       comparison = a.config.agent_name.localeCompare(b.config.agent_name);
     } else if (sortBy === 'created_at') {
       comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    } else if (sortBy === 'status') {
-      comparison = a.status.localeCompare(b.status);
     }
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  const toggleSort = (column: 'name' | 'created_at' | 'status') => {
+  const toggleSort = (column: 'name' | 'created_at') => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -89,11 +86,8 @@ export function AgentTable({
           <table className="w-full min-w-[560px]">
             <thead>
               <tr className="border-b border-border bg-subtle">
-                <th className="px-4 h-10 text-left whitespace-nowrap">
-                  <button type="button" onClick={() => toggleSort('status')} className={sortBtn}>
-                    Status
-                    <ChevronsUpDown className="w-3 h-3" />
-                  </button>
+                <th className="px-2 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap w-10">
+                  #
                 </th>
                 <th className="px-4 h-10 text-left whitespace-nowrap">
                   <button type="button" onClick={() => toggleSort('name')} className={sortBtn}>
@@ -104,22 +98,21 @@ export function AgentTable({
                 <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
                   Model
                 </th>
-                <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden lg:table-cell">
-                  Role
-                </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {sortedAgents.map((agent) => (
+              {sortedAgents.map((agent, idx) => (
                 <tr
                   key={agent.id}
                   className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
                 >
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <AgentStatusIndicator status={agent.status} showLabel />
+                  <td className="px-2 py-3 text-right whitespace-nowrap">
+                    <div className="text-xs text-muted-foreground tabular-nums">
+                      {idx + 1}
+                    </div>
                   </td>
                   <td className="px-4 py-3 min-w-[160px]">
                     <div
@@ -132,11 +125,6 @@ export function AgentTable({
                   <td className="px-4 py-3 hidden md:table-cell">
                     <div className="font-mono text-xs text-muted-foreground truncate max-w-[140px]">
                       {agent.config.model_name}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 hidden lg:table-cell">
-                    <div className="text-xs text-muted-foreground">
-                      {agent.config.role || 'worker'}
                     </div>
                   </td>
                   <td className="px-3 py-2">

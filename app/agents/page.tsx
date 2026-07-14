@@ -29,15 +29,23 @@ const ROLE_OPTIONS: { value: string; label: string }[] = [
 ];
 
 function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
-  const id =
-    (config as unknown as { id?: string }).id ||
-    `${config.agent_name || 'agent'}-${idx}`;
+  const raw = config as unknown as Record<string, unknown>;
+  const id = (raw.id as string) || `${config.agent_name || 'agent'}-${idx}`;
+  const created_at =
+    (raw.created_at as string) ||
+    (raw.createdAt as string) ||
+    (raw.timestamp as string) ||
+    new Date(0).toISOString();
+  const updated_at =
+    (raw.updated_at as string) ||
+    (raw.updatedAt as string) ||
+    created_at;
   return {
     id,
     config,
     status: 'idle',
-    created_at: new Date(0).toISOString(),
-    updated_at: new Date(0).toISOString(),
+    created_at,
+    updated_at,
     execution_history: [],
   };
 }
@@ -47,6 +55,8 @@ export default function AgentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'created_at' | 'name' | 'updated_at'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
@@ -98,14 +108,30 @@ export default function AgentsPage() {
     });
   }, [agents, searchQuery, modelFilter, roleFilter]);
 
+  const sortedAgents = useMemo(() => {
+    const sorted = [...filteredAgents];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === 'name') {
+        cmp = a.config.agent_name.localeCompare(b.config.agent_name);
+      } else if (sortBy === 'created_at') {
+        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      } else if (sortBy === 'updated_at') {
+        cmp = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+      }
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+    return sorted;
+  }, [filteredAgents, sortBy, sortOrder]);
+
   const paginatedAgents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAgents.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAgents, currentPage, itemsPerPage]);
+    return sortedAgents.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedAgents, currentPage, itemsPerPage]);
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, modelFilter, roleFilter]);
+  }, [searchQuery, modelFilter, roleFilter, sortBy, sortOrder]);
 
   const totalPages = Math.ceil(filteredAgents.length / itemsPerPage);
 
@@ -242,6 +268,25 @@ export default function AgentsPage() {
                   value={roleFilter}
                   onChange={setRoleFilter}
                   options={ROLE_OPTIONS}
+                />
+                <FilterSelect
+                  label="Sort"
+                  value={`${sortBy}:${sortOrder}`}
+                  onChange={(val) => {
+                    const [by, order] = val.split(':') as [
+                      'created_at' | 'name' | 'updated_at',
+                      'asc' | 'desc',
+                    ];
+                    setSortBy(by);
+                    setSortOrder(order);
+                  }}
+                  options={[
+                    { value: 'created_at:desc', label: 'Most recent' },
+                    { value: 'created_at:asc', label: 'Oldest first' },
+                    { value: 'name:asc', label: 'Name A–Z' },
+                    { value: 'name:desc', label: 'Name Z–A' },
+                    { value: 'updated_at:desc', label: 'Recently used' },
+                  ]}
                 />
                 {hasActiveFilter && (
                   <button

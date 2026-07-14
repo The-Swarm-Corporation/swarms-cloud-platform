@@ -55,7 +55,7 @@ export default function AgentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'created_at' | 'name' | 'updated_at'>('created_at');
+  const [sortBy, setSortBy] = useState<'created_at' | 'name'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -109,19 +109,18 @@ export default function AgentsPage() {
   }, [agents, searchQuery, modelFilter, roleFilter]);
 
   const sortedAgents = useMemo(() => {
-    const sorted = [...filteredAgents];
-    sorted.sort((a, b) => {
+    const withIdx = filteredAgents.map((a, i) => ({ agent: a, idx: i }));
+    withIdx.sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'name') {
-        cmp = a.config.agent_name.localeCompare(b.config.agent_name);
+        cmp = a.agent.config.agent_name.localeCompare(b.agent.config.agent_name);
       } else if (sortBy === 'created_at') {
-        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      } else if (sortBy === 'updated_at') {
-        cmp = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        cmp = new Date(a.agent.created_at).getTime() - new Date(b.agent.created_at).getTime();
       }
+      if (cmp === 0) cmp = b.idx - a.idx;
       return sortOrder === 'asc' ? cmp : -cmp;
     });
-    return sorted;
+    return withIdx.map(({ agent }) => agent);
   }, [filteredAgents, sortBy, sortOrder]);
 
   const paginatedAgents = useMemo(() => {
@@ -274,7 +273,7 @@ export default function AgentsPage() {
                   value={`${sortBy}:${sortOrder}`}
                   onChange={(val) => {
                     const [by, order] = val.split(':') as [
-                      'created_at' | 'name' | 'updated_at',
+                      'created_at' | 'name',
                       'asc' | 'desc',
                     ];
                     setSortBy(by);
@@ -285,7 +284,6 @@ export default function AgentsPage() {
                     { value: 'created_at:asc', label: 'Oldest first' },
                     { value: 'name:asc', label: 'Name A–Z' },
                     { value: 'name:desc', label: 'Name Z–A' },
-                    { value: 'updated_at:desc', label: 'Recently used' },
                   ]}
                 />
                 {hasActiveFilter && (

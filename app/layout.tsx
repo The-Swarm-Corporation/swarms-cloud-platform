@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ToastContainer } from '@/components/ui/Toast';
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { ThemeProvider, themeInitScript } from '@/components/layout/ThemeProvider';
 import { Footer } from '@/components/layout/Footer';
 import {
@@ -175,6 +176,7 @@ export default function RootLayout({
             <div className="flex-1 flex flex-col min-w-0">{children}</div>
             <Footer />
             <ToastContainer />
+            <OnboardingWizard />
           </div>
         </ThemeProvider>
       </body>

@@ -6,16 +6,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
+// Every cloud page requires a session; only auth and legal pages are public.
 const PUBLIC_PATH_PREFIXES = [
   '/login',
   '/signup',
   '/auth',
   '/terms',
   '/privacy',
-  '/learn-more',
-  // Model catalog pages are public for SEO: they are statically generated,
-  // listed in the sitemap, and must be crawlable without a session.
-  '/models',
 ];
 
 function isPublicPath(pathname: string): boolean {

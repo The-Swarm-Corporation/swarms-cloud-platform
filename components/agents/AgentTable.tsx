@@ -86,6 +86,9 @@ export function AgentTable({
           <table className="w-full min-w-[560px]">
             <thead>
               <tr className="border-b border-border bg-subtle">
+                <th className="px-2 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap w-10">
+                  #
+                </th>
                 <th className="px-4 h-10 text-left whitespace-nowrap">
                   <button type="button" onClick={() => toggleSort('name')} className={sortBtn}>
                     Name
@@ -101,11 +104,16 @@ export function AgentTable({
               </tr>
             </thead>
             <tbody>
-              {sortedAgents.map((agent) => (
+              {sortedAgents.map((agent, idx) => (
                 <tr
                   key={agent.id}
                   className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
                 >
+                  <td className="px-2 py-3 text-right whitespace-nowrap">
+                    <div className="text-xs text-muted-foreground tabular-nums">
+                      {idx + 1}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 min-w-[160px]">
                     <div
                       className="text-sm text-foreground truncate max-w-[200px]"

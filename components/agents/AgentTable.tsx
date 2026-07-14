@@ -93,13 +93,7 @@ export function AgentTable({
                   </button>
                 </th>
                 <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                  Description
-                </th>
-                <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
                   Model
-                </th>
-                <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Total Completions
                 </th>
                 <th className="px-4 h-10 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Actions
@@ -121,18 +115,8 @@ export function AgentTable({
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <div className="text-xs text-muted-foreground truncate max-w-[200px]" title={agent.config.description ?? ''}>
-                      {agent.config.description || '—'}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
                     <div className="font-mono text-xs text-muted-foreground truncate max-w-[140px]">
                       {agent.config.model_name}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <div className="text-xs text-muted-foreground tabular-nums">
-                      {agent.execution_history.length.toLocaleString()}
                     </div>
                   </td>
                   <td className="px-3 py-2">

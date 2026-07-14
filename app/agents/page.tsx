@@ -217,7 +217,7 @@ export default function AgentsPage() {
                       <span className="hidden sm:inline">Compare</span>
                     </Button>
                   </Link>
-                  <Link href="/">
+                  <Link href="/workbench">
                     <Button variant="primary" size="md">
                       <Plus className="w-3.5 h-3.5" />
                       New agent
@@ -428,7 +428,7 @@ function EmptyState({
         {description}
       </p>
       {showCta && (
-        <Link href="/">
+        <Link href="/workbench">
           <Button variant="primary" size="md">
             <Plus className="w-3.5 h-3.5" />
             Create agent

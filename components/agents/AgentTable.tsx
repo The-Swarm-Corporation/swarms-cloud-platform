@@ -101,6 +101,9 @@ export function AgentTable({
                     <ChevronsUpDown className="w-3 h-3" />
                   </button>
                 </th>
+                <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden sm:table-cell">
+                  Description
+                </th>
                 <th className="px-4 h-10 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap hidden md:table-cell">
                   Model
                 </th>
@@ -139,6 +142,14 @@ export function AgentTable({
                           title={agent.config.agent_name}
                         >
                           {agent.config.agent_name}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <div
+                          className="text-xs text-muted-foreground truncate max-w-[280px]"
+                          title={agent.config.description || undefined}
+                        >
+                          {agent.config.description || '—'}
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">

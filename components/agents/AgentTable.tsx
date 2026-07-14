@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAgents } from '@/lib/hooks/useAgents';
 import { AgentConfigPanel } from './AgentConfigPanel';
 import { Agent } from '@/types/agent';
-import { Play, Edit, Trash2, Copy, Plus, ChevronsUpDown, Users, ChevronRight } from 'lucide-react';
+import { Play, Edit, Trash2, Copy, Check, Plus, ChevronsUpDown, Users, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface AgentTableProps {
@@ -25,11 +25,22 @@ export function AgentTable({
   showCreateButton = true,
   startIndex = 0,
 }: AgentTableProps) {
-  const { agents: hookAgents, removeAgent, duplicateAgent } = useAgents();
+  const { agents: hookAgents, removeAgent } = useAgents();
   const agents = providedAgents ?? hookAgents;
   const [sortBy, setSortBy] = useState<'name' | 'created_at'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyConfig = async (agent: Agent) => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(agent.config, null, 2));
+      setCopiedId(agent.id);
+      setTimeout(() => setCopiedId((prev) => (prev === agent.id ? null : prev)), 1200);
+    } catch {
+      // ignore
+    }
+  };
 
   const sortedAgents = [...agents].sort((a, b) => {
     let comparison = 0;
@@ -177,11 +188,15 @@ export function AgentTable({
                           </button>
                           <button
                             type="button"
-                            onClick={() => duplicateAgent(agent.id)}
+                            onClick={() => handleCopyConfig(agent)}
                             className={actionBtn}
-                            title="Duplicate"
+                            title="Copy configuration"
                           >
-                            <Copy className="w-3.5 h-3.5" />
+                            {copiedId === agent.id ? (
+                              <Check className="w-3.5 h-3.5 text-success" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
                           </button>
                           <button
                             type="button"

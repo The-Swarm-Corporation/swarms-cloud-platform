@@ -20,6 +20,14 @@ import {
   GitCompare,
 } from 'lucide-react';
 
+const ROLE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'all', label: 'All roles' },
+  { value: 'worker', label: 'Worker' },
+  { value: 'analyst', label: 'Analyst' },
+  { value: 'manager', label: 'Manager' },
+  { value: 'researcher', label: 'Researcher' },
+];
+
 function configToDisplayAgent(config: AgentConfig, idx: number): Agent {
   const raw = config as unknown as Record<string, unknown>;
   const id = (raw.id as string) || `${config.agent_name || 'agent'}-${idx}`;
@@ -79,12 +87,17 @@ export default function AgentsPage() {
     return agents.filter((agent) => {
       const c = agent.config;
       if (modelFilter !== 'all' && c.model_name !== modelFilter) return false;
+      if (roleFilter !== 'all') {
+        const role = (c.role ?? '').toLowerCase();
+        if (role !== roleFilter.toLowerCase()) return false;
+      }
       if (terms.length === 0) return true;
 
       const haystack = [
         c.agent_name,
         c.description,
         c.model_name,
+        c.role,
         c.system_prompt,
       ]
         .filter(Boolean)
@@ -93,7 +106,7 @@ export default function AgentsPage() {
 
       return terms.every((t) => haystack.includes(t));
     });
-  }, [agents, searchQuery, modelFilter]);
+  }, [agents, searchQuery, modelFilter, roleFilter]);
 
   const sortedAgents = useMemo(() => {
     const withIdx = filteredAgents.map((a, i) => ({ agent: a, idx: i }));
@@ -134,6 +147,7 @@ export default function AgentsPage() {
       'agent_name',
       'description',
       'model_name',
+      'role',
       'temperature',
       'max_loops',
       'max_tokens',
@@ -144,6 +158,7 @@ export default function AgentsPage() {
       a.config.agent_name ?? '',
       a.config.description ?? '',
       a.config.model_name ?? '',
+      a.config.role ?? '',
       a.config.temperature ?? '',
       a.config.max_loops ?? '',
       a.config.max_tokens ?? '',
@@ -154,7 +169,7 @@ export default function AgentsPage() {
   };
 
   const hasActiveFilter =
-    !!searchQuery.trim() || modelFilter !== 'all';
+    !!searchQuery.trim() || modelFilter !== 'all' || roleFilter !== 'all';
 
   return (
     <div className="page-wrapper">
@@ -277,6 +292,7 @@ export default function AgentsPage() {
                     onClick={() => {
                       setSearchQuery('');
                       setModelFilter('all');
+                      setRoleFilter('all');
                     }}
                     className="text-[11px] text-muted-foreground hover:text-foreground underline"
                   >

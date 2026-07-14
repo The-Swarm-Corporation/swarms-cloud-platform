@@ -340,6 +340,7 @@ export default function AgentsPage() {
                 onEditAgent={handleEditAgent}
                 onExecuteAgent={handleExecuteAgent}
                 showCreateButton={false}
+                startIndex={(currentPage - 1) * itemsPerPage}
               />
               {totalPages > 1 && (
                 <Pagination

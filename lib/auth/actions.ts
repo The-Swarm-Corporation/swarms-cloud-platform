@@ -5,6 +5,8 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import type { AuthError, Provider } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { grantSignupCredits } from '@/lib/billing/credits';
 
 function getSiteOrigin(headerOrigin: string | null): string {
   if (headerOrigin) return headerOrigin;
@@ -90,6 +92,9 @@ export async function signUpWithPasswordAction(
   }
 
   if (data.session) {
+    const admin = createAdminClient();
+    if (admin) await grantSignupCredits(admin, data.session.user.id);
+
     revalidatePath('/', 'layout');
     redirect('/');
   }

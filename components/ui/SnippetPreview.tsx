@@ -15,6 +15,7 @@ interface SnippetPreviewProps {
   baseUrl?: string;
   title?: string;
   className?: string;
+  defaultLanguage?: SnippetLanguage;
 }
 
 const DEFAULT_BASE_URL = 'https://api.swarms.world';
@@ -26,8 +27,9 @@ export function SnippetPreview({
   baseUrl = DEFAULT_BASE_URL,
   title,
   className = '',
+  defaultLanguage = 'curl',
 }: SnippetPreviewProps) {
-  const [lang, setLang] = useState<SnippetLanguage>('curl');
+  const [lang, setLang] = useState<SnippetLanguage>(defaultLanguage);
   const [copied, setCopied] = useState(false);
 
   const code = useMemo(
@@ -47,7 +49,7 @@ export function SnippetPreview({
 
   return (
     <div
-      className={`rounded-md border border-border bg-card overflow-hidden min-w-0 ${className}`}
+      className={`flex flex-col rounded-md border border-border bg-card overflow-hidden min-w-0 ${className}`}
     >
       <header className="flex items-center justify-between gap-2 px-3 h-9 border-b border-border bg-subtle/60">
         <div className="flex items-center gap-2 min-w-0">
@@ -109,7 +111,7 @@ export function SnippetPreview({
         })}
       </div>
 
-      <pre className="px-3 py-3 text-[12px] leading-relaxed font-mono text-foreground bg-card overflow-x-auto max-h-[420px] whitespace-pre">
+      <pre className="px-3 py-3 text-[12px] leading-relaxed font-mono text-foreground bg-card overflow-auto flex-1 min-h-0 max-h-[420px] whitespace-pre-wrap break-words">
         <code>{code}</code>
       </pre>
     </div>

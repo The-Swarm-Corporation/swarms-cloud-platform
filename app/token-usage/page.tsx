@@ -8,7 +8,6 @@ import {
   ChartSeries,
 } from '@/components/usage/TokenUsageChart';
 import {
-  Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -204,7 +203,6 @@ export default function TokenUsagePage() {
   const [keyFilter, setKeyFilter] = useState('all');
   const [agentFilter, setAgentFilter] = useState('all');
   const [showTable, setShowTable] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const [data, setData] = useState<UsageResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -462,24 +460,9 @@ export default function TokenUsagePage() {
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <button
-                type="button"
-                onClick={() => setShowCalendar((s) => !s)}
-                className="relative inline-flex items-center gap-1 px-1.5 text-xs font-medium text-foreground whitespace-nowrap min-w-[104px] text-center tabular-nums hover:bg-muted rounded transition-colors cursor-pointer"
-              >
-                <Calendar className="w-3 h-3 text-muted-foreground" />
+              <span className="px-1.5 text-xs font-medium text-foreground whitespace-nowrap min-w-[104px] text-center tabular-nums">
                 {anchor ? periodLabel(anchor, view) : '—'}
-                {showCalendar && (
-                  <CalendarPopup
-                    anchor={anchor ?? new Date()}
-                    onSelect={(d) => {
-                      setAnchor(startOfPeriod(d, view));
-                      setShowCalendar(false);
-                    }}
-                    onClose={() => setShowCalendar(false)}
-                  />
-                )}
-              </button>
+              </span>
               <button
                 type="button"
                 aria-label="Next period"
@@ -757,87 +740,5 @@ function StatTile({ label, value }: { label: string; value: string }) {
         {value}
       </div>
     </div>
-  );
-}
-
-function CalendarPopup({
-  anchor,
-  onSelect,
-  onClose,
-}: {
-  anchor: Date;
-  onSelect: (d: Date) => void;
-  onClose: () => void;
-}) {
-  const [page, setPage] = useState(startOfMonth(anchor));
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const daysInMonth = new Date(page.getFullYear(), page.getMonth() + 1, 0).getDate();
-  const startDay = new Date(page.getFullYear(), page.getMonth(), 1).getDay();
-  const startOffset = (startDay + 6) % 7; // Monday-first
-
-  const cells: (number | null)[] = Array(startOffset).fill(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-  while (cells.length % 7 !== 0) cells.push(null);
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[232px] rounded-lg border border-border bg-card p-3 shadow-lg">
-        <div className="flex items-center justify-between mb-2">
-          <button
-            type="button"
-            onClick={() => setPage(new Date(page.getFullYear(), page.getMonth() - 1, 1))}
-            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-xs font-medium text-foreground">
-            {page.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage(new Date(page.getFullYear(), page.getMonth() + 1, 1))}
-            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <div className="grid grid-cols-7 gap-0 text-center">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-            <div key={d} className="text-[10px] text-muted-foreground py-1">
-              {d}
-            </div>
-          ))}
-          {cells.map((day, i) =>
-            day !== null ? (
-              <button
-                key={i}
-                type="button"
-                onClick={() => onSelect(new Date(page.getFullYear(), page.getMonth(), day))}
-                className={`text-xs w-7 h-7 rounded-full transition-colors mx-auto ${
-                  day === anchor.getDate() &&
-                  page.getMonth() === anchor.getMonth() &&
-                  page.getFullYear() === anchor.getFullYear()
-                    ? 'bg-foreground text-background font-medium'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                {day}
-              </button>
-            ) : (
-              <div key={i} />
-            ),
-          )}
-        </div>
-      </div>
-    </>
   );
 }

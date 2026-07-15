@@ -8,7 +8,6 @@ import {
   ChartSeries,
 } from '@/components/usage/TokenUsageChart';
 import {
-  Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -127,7 +126,6 @@ export default function TokenUsagePage() {
   const [keyFilter, setKeyFilter] = useState('all');
   const [agentFilter, setAgentFilter] = useState('all');
   const [showTable, setShowTable] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const [data, setData] = useState<UsageResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);

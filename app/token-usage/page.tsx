@@ -19,6 +19,7 @@ import {
   XCircle,
 } from 'lucide-react';
 
+type ViewBy = 'month' | 'week' | 'day';
 type GroupBy = 'agent' | 'key' | 'none';
 type Metric = 'total' | 'input' | 'output' | 'cost';
 
@@ -38,6 +39,8 @@ interface UsageResponse {
   truncated: boolean;
 }
 
+// Validated categorical palette (dataviz reference instance) — fixed slot
+// order, dark steps selected for the dark surface, never cycled past 8.
 const VIZ_STYLE = `
 .usage-viz {
   --viz-s1: #2a78d6; --viz-s2: #1baf7a; --viz-s3: #eda100; --viz-s4: #008300;
@@ -63,6 +66,9 @@ const METRIC_LABELS: Record<Metric, string> = {
 
 const DAY_MS = 86_400_000;
 
+// Session-level cache keyed by period, mirroring the server route's TTLs:
+// fully-elapsed periods are immutable (logs only append), the current period
+// goes stale quickly. Module-level so it survives route navigation.
 const CLIENT_TTL_CURRENT_MS = 60_000;
 const CLIENT_TTL_PAST_MS = 60 * 60_000;
 const MAX_CLIENT_CACHE_ENTRIES = 50;
@@ -83,11 +89,89 @@ function usageCacheSet(key: string, data: UsageResponse, periodEndMs: number): v
   }
 }
 
+/* ---------- period helpers (local time) ---------- */
+
 function startOfDay(d: Date): Date {
   const r = new Date(d);
   r.setHours(0, 0, 0, 0);
   return r;
 }
+
+function startOfWeek(d: Date): Date {
+  const r = startOfDay(d);
+  r.setDate(r.getDate() - ((r.getDay() + 6) % 7)); // Monday
+  return r;
+}
+
+function startOfMonth(d: Date): Date {
+  const r = startOfDay(d);
+  r.setDate(1);
+  return r;
+}
+
+function startOfPeriod(d: Date, view: ViewBy): Date {
+  if (view === 'month') return startOfMonth(d);
+  if (view === 'week') return startOfWeek(d);
+  return startOfDay(d);
+}
+
+function addPeriod(d: Date, view: ViewBy, n: number): Date {
+  const r = new Date(d);
+  if (view === 'month') r.setMonth(r.getMonth() + n);
+  else r.setDate(r.getDate() + (view === 'week' ? 7 * n : n));
+  return r;
+}
+
+function periodLabel(anchor: Date, view: ViewBy): string {
+  if (view === 'month') {
+    return anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }
+  if (view === 'week') {
+    const end = addPeriod(anchor, 'week', 1);
+    end.setDate(end.getDate() - 1);
+    const from = anchor.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const to = end.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${from} – ${to}`;
+  }
+  return anchor.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function makeBucketDates(anchor: Date, view: ViewBy): Date[] {
+  if (view === 'day') {
+    return Array.from({ length: 24 }, (_, h) => {
+      const d = new Date(anchor);
+      d.setHours(h);
+      return d;
+    });
+  }
+  const days =
+    view === 'week'
+      ? 7
+      : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0).getDate();
+  return Array.from({ length: days }, (_, i) => {
+    const d = new Date(anchor);
+    d.setDate(anchor.getDate() + i);
+    return d;
+  });
+}
+
+function bucketIndex(ts: Date, anchor: Date, view: ViewBy, count: number): number {
+  let idx: number;
+  if (view === 'day') idx = ts.getHours();
+  else if (view === 'month') idx = ts.getDate() - 1;
+  else idx = Math.round((startOfDay(ts).getTime() - anchor.getTime()) / DAY_MS);
+  return Math.min(Math.max(idx, 0), count - 1);
+}
+
+/* ---------- formatting ---------- */
 
 function formatTokensCompact(v: number): string {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1)}M`;
@@ -109,18 +193,11 @@ function metricValue(log: UsageLog, metric: Metric): number {
   return log.totalTokens;
 }
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function daysBetween(a: Date, b: Date): number {
-  return Math.round((b.getTime() - a.getTime()) / DAY_MS) + 1;
-}
+/* ---------- page ---------- */
 
 export default function TokenUsagePage() {
-  const today = useMemo(() => startOfDay(new Date()), []);
-  const [rangeStart, setRangeStart] = useState<Date>(today);
-  const [rangeEnd, setRangeEnd] = useState<Date>(today);
+  const [view, setView] = useState<ViewBy>('month');
+  const [anchor, setAnchor] = useState<Date | null>(null);
   const [groupBy, setGroupBy] = useState<GroupBy>('agent');
   const [metric, setMetric] = useState<Metric>('total');
   const [keyFilter, setKeyFilter] = useState('all');
@@ -133,10 +210,16 @@ export default function TokenUsagePage() {
   const [reloadNonce, setReloadNonce] = useState(0);
   const forceRefreshRef = React.useRef(false);
 
+  // Anchor is set on the client only, to keep prerender/hydrate output identical.
   useEffect(() => {
+    setAnchor(startOfPeriod(new Date(), 'month'));
+  }, []);
+
+  useEffect(() => {
+    if (!anchor) return;
     const controller = new AbortController();
-    const end = new Date(rangeEnd.getTime() + DAY_MS);
-    const cacheKey = `${rangeStart.toISOString()}|${end.toISOString()}`;
+    const end = addPeriod(anchor, view, 1);
+    const cacheKey = `${anchor.toISOString()}|${end.toISOString()}`;
     const force = forceRefreshRef.current;
     forceRefreshRef.current = false;
 
@@ -153,7 +236,7 @@ export default function TokenUsagePage() {
     setIsLoading(true);
     setError(null);
     fetch(
-      `/api/token-usage?start=${encodeURIComponent(rangeStart.toISOString())}&end=${encodeURIComponent(end.toISOString())}${force ? '&refresh=1' : ''}`,
+      `/api/token-usage?start=${encodeURIComponent(anchor.toISOString())}&end=${encodeURIComponent(end.toISOString())}${force ? '&refresh=1' : ''}`,
       { signal: controller.signal, cache: 'no-store' },
     )
       .then(async (res) => {
@@ -170,7 +253,21 @@ export default function TokenUsagePage() {
         if (!controller.signal.aborted) setIsLoading(false);
       });
     return () => controller.abort();
-  }, [rangeStart, rangeEnd, reloadNonce]);
+  }, [anchor, view, reloadNonce]);
+
+  const changeView = (next: ViewBy) => {
+    setView(next);
+    setAnchor((prev) => startOfPeriod(prev ?? new Date(), next));
+  };
+
+  const shiftPeriod = (dir: 1 | -1) => {
+    setAnchor((prev) => (prev ? addPeriod(prev, view, dir) : prev));
+  };
+
+  const atCurrentPeriod = useMemo(() => {
+    if (!anchor) return true;
+    return addPeriod(anchor, view, 1).getTime() > Date.now();
+  }, [anchor, view]);
 
   const keyNames = useMemo(() => {
     const map = new Map<string, string>();
@@ -206,6 +303,8 @@ export default function TokenUsagePage() {
     return { input, output, cost, requests: filteredLogs.length };
   }, [filteredLogs]);
 
+  // Series identity comes from ALL period logs (not the filtered set) so that
+  // toggling the key/agent filters never repaints surviving series.
   const series: ChartSeries[] = useMemo(() => {
     if (groupBy === 'none') {
       return [{ key: 'total', label: METRIC_LABELS[metric], color: SERIES_COLORS[0] }];
@@ -229,34 +328,35 @@ export default function TokenUsagePage() {
   }, [data, groupBy, metric, keyNames]);
 
   const buckets: ChartBucket[] = useMemo(() => {
-    const count = daysBetween(rangeStart, rangeEnd);
-    const dates = Array.from({ length: count }, (_, i) => {
-      const d = new Date(rangeStart);
-      d.setDate(rangeStart.getDate() + i);
-      return d;
-    });
+    if (!anchor) return [];
+    const dates = makeBucketDates(anchor, view);
     const seriesIndex = new Map(series.map((s, i) => [s.key, i]));
     const otherIdx = seriesIndex.get('__other__');
     const result: ChartBucket[] = dates.map((d) => ({
-      label: d.toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      }),
-      tick: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      label:
+        view === 'day'
+          ? `${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${d.toLocaleTimeString(undefined, { hour: 'numeric' })}`
+          : d.toLocaleDateString(undefined, {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+            }),
+      tick:
+        view === 'day'
+          ? d.toLocaleTimeString(undefined, { hour: 'numeric' })
+          : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
       values: series.map(() => 0),
     }));
     for (const log of filteredLogs) {
       const ts = new Date(log.timestamp);
-      const idx = Math.round((startOfDay(ts).getTime() - rangeStart.getTime()) / DAY_MS);
-      const bi = Math.min(Math.max(idx, 0), result.length - 1);
+      const bi = bucketIndex(ts, anchor, view, result.length);
       const id = groupBy === 'agent' ? log.agent : groupBy === 'key' ? log.keyId : 'total';
       const si = seriesIndex.get(id) ?? otherIdx;
       if (si === undefined) continue;
       result[bi].values[si] += metricValue(log, metric);
     }
     return result;
-  }, [rangeStart, rangeEnd, series, filteredLogs, groupBy, metric]);
+  }, [anchor, view, series, filteredLogs, groupBy, metric]);
 
   const hasData = useMemo(
     () => buckets.some((b) => b.values.some((v) => v > 0)),
@@ -266,6 +366,7 @@ export default function TokenUsagePage() {
   const formatValue = metric === 'cost' ? formatCost : formatTokensCompact;
 
   const exportCsv = () => {
+    if (!anchor) return;
     const header = ['Period', ...series.map((s) => s.label), 'Total'];
     const rows = buckets.map((b) => [
       b.label,
@@ -279,15 +380,10 @@ export default function TokenUsagePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `token-usage-${rangeStart.toISOString().slice(0, 10)}-${rangeEnd.toISOString().slice(0, 10)}.csv`;
+    a.download = `token-usage-${view}-${anchor.toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  const rangeLabel =
-    rangeStart.getTime() === rangeEnd.getTime()
-      ? formatDate(rangeStart)
-      : `${formatDate(rangeStart)} – ${formatDate(rangeEnd)}`;
 
   return (
     <div className="page-wrapper usage-viz">
@@ -303,7 +399,8 @@ export default function TokenUsagePage() {
                 Token usage
               </h1>
               <p className="text-sm text-muted-foreground max-w-2xl">
-                Input and output tokens across your completions — filter by API key and agent.
+                Input and output tokens across your completions, by day, week, or
+                month — filter by API key and agent.
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -331,29 +428,50 @@ export default function TokenUsagePage() {
             </div>
           </div>
 
-          {/* Filter row */}
+          {/* Filter row — scopes everything below it */}
           <div className="flex items-center gap-2 flex-wrap mb-6">
-            <div className="relative">
+            <div
+              className="inline-flex items-center h-8 rounded-md border border-border bg-card p-0.5"
+              role="group"
+              aria-label="View by"
+            >
+              {(['month', 'week', 'day'] as ViewBy[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => changeView(v)}
+                  className={`h-full px-3 rounded-[5px] text-xs capitalize transition-colors ${
+                    view === v
+                      ? 'bg-foreground text-background font-medium'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+
+            <div className="inline-flex items-center h-8 rounded-md border border-border bg-card">
               <button
                 type="button"
-                onClick={() => setShowCalendar((s) => !s)}
-                className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-border bg-card text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                aria-label="Previous period"
+                onClick={() => shiftPeriod(-1)}
+                className="h-full px-2 rounded-l-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                {rangeLabel}
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              {showCalendar && (
-                <CalendarPopup
-                  rangeStart={rangeStart}
-                  rangeEnd={rangeEnd}
-                  onSelect={(start, end) => {
-                    setRangeStart(start);
-                    setRangeEnd(end);
-                    setShowCalendar(false);
-                  }}
-                  onClose={() => setShowCalendar(false)}
-                />
-              )}
+              <span className="px-1.5 text-xs font-medium text-foreground whitespace-nowrap min-w-[104px] text-center tabular-nums">
+                {anchor ? periodLabel(anchor, view) : '—'}
+              </span>
+              <button
+                type="button"
+                aria-label="Next period"
+                onClick={() => shiftPeriod(1)}
+                disabled={atCurrentPeriod}
+                className="h-full px-2 rounded-r-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             <div aria-hidden className="hidden sm:block h-4 w-px bg-border mx-1" />
@@ -441,6 +559,7 @@ export default function TokenUsagePage() {
               <p className="text-sm text-muted-foreground">Loading token usage…</p>
             </div>
           ) : (
+            // Refetch keeps the frame: previous render holds at reduced opacity.
             <div className={isLoading ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
               {/* Stat tiles */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -537,6 +656,7 @@ export default function TokenUsagePage() {
                   />
                 )}
 
+                {/* Legend — only for 2+ series */}
                 {series.length > 1 && hasData && (
                   <div className="flex items-center gap-4 flex-wrap mt-4 pt-4 border-t border-border">
                     {series.map((s) => (
@@ -620,159 +740,5 @@ function StatTile({ label, value }: { label: string; value: string }) {
         {value}
       </div>
     </div>
-  );
-}
-
-function CalendarPopup({
-  rangeStart,
-  rangeEnd,
-  onSelect,
-  onClose,
-}: {
-  rangeStart: Date;
-  rangeEnd: Date;
-  onSelect: (start: Date, end: Date) => void;
-  onClose: () => void;
-}) {
-  const [selecting, setSelecting] = useState<'start' | 'end'>('start');
-  const [start, setStart] = useState(rangeStart);
-  const [end, setEnd] = useState(rangeEnd);
-  const [page, setPage] = useState(() => startOfDay(new Date()));
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const today = startOfDay(new Date());
-
-  function isSameDay(a: Date, b: Date) {
-    return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-  }
-
-  function isInRange(d: Date) {
-    return d >= start && d <= end;
-  }
-
-  function isFuture(d: Date) {
-    return d > today;
-  }
-
-  function handleDayClick(d: Date) {
-    if (isFuture(d)) return;
-    if (selecting === 'start') {
-      setStart(d);
-      setEnd(d);
-      setSelecting('end');
-    } else {
-      const s = d < start ? d : start;
-      const e = d < start ? start : d;
-      setStart(s);
-      setEnd(e);
-      onSelect(s, e);
-    }
-  }
-
-  function renderMonth(year: number, month: number) {
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDay = new Date(year, month, 1).getDay();
-    const startOffset = (startDay + 6) % 7;
-    const cells: (number | null)[] = Array(startOffset).fill(null);
-    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-    while (cells.length % 7 !== 0) cells.push(null);
-
-    return (
-      <div className="grid grid-cols-7 gap-0 text-center">
-        {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-          <div key={d} className="text-[10px] text-muted-foreground py-1">{d}</div>
-        ))}
-        {cells.map((day, i) => {
-          if (day === null) return <div key={i} />;
-          const date = new Date(year, month, day);
-          const selected = isSameDay(date, start) || isSameDay(date, end);
-          const inRange = isInRange(date);
-          const isToday = isSameDay(date, today);
-          const future = isFuture(date);
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => handleDayClick(date)}
-              disabled={future}
-              className={`text-xs w-7 h-7 rounded-full transition-colors mx-auto ${
-                future
-                  ? 'text-muted-foreground/30 cursor-default'
-                  : selected
-                    ? 'bg-accent text-accent-foreground font-medium'
-                    : inRange
-                      ? 'bg-accent/20 text-foreground'
-                      : isToday
-                        ? 'ring-1 ring-inset ring-border text-foreground'
-                        : 'text-foreground hover:bg-muted'
-              }`}
-            >
-              {day}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  const leftMonth = page.getMonth();
-  const leftYear = page.getFullYear();
-  const rightMonth = leftMonth === 11 ? 0 : leftMonth + 1;
-  const rightYear = leftMonth === 11 ? leftYear + 1 : leftYear;
-  const rightDate = new Date(rightYear, rightMonth);
-  const canGoForward = rightDate <= new Date(today.getFullYear(), today.getMonth());
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-50 w-[400px] rounded-lg border border-border bg-card p-3 shadow-lg">
-        <div className="flex items-center justify-between mb-2">
-          <button
-            type="button"
-            onClick={() => setPage(new Date(leftYear, leftMonth - 1, 1))}
-            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-xs font-medium text-foreground">
-            {new Date(leftYear, leftMonth).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-            {'  '}
-            {new Date(rightYear, rightMonth).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage(new Date(leftYear, leftMonth + 1, 1))}
-            disabled={!canGoForward}
-            className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <div className="text-[10px] font-medium text-muted-foreground text-center mb-1">
-              {new Date(leftYear, leftMonth).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-            </div>
-            {renderMonth(leftYear, leftMonth)}
-          </div>
-          <div>
-            <div className="text-[10px] font-medium text-muted-foreground text-center mb-1">
-              {new Date(rightYear, rightMonth).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-            </div>
-            {renderMonth(rightYear, rightMonth)}
-          </div>
-        </div>
-        <div className="mt-2 text-[10px] text-muted-foreground text-center">
-          {selecting === 'start' ? 'Select start date' : 'Select end date'}
-        </div>
-      </div>
-    </>
   );
 }

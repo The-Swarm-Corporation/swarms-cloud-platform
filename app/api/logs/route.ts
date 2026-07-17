@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     const client = new SwarmsAPIClient(apiKey, process.env.SWARMS_API_BASE_URL);
-    const data = await client.getSwarmLogs();
+    const data = await client.getSwarmLogs({ order: 'desc', limit: '500' });
 
     cache.set(cacheKey, { data, expiresAt: now + CACHE_TTL_MS });
 

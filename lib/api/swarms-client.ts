@@ -302,14 +302,18 @@ export class SwarmsAPIClient {
     }
   }
 
-  async getSwarmLogs(): Promise<{
+  async getSwarmLogs(params?: Record<string, string>): Promise<{
     status?: string;
     count?: number;
     logs?: unknown;
     timestamp?: string;
   }> {
     try {
-      const response = await fetch(`${this.baseURL}/v1/swarm/logs`, {
+      const url = new URL(`${this.baseURL}/v1/swarm/logs`);
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+      }
+      const response = await fetch(url.toString(), {
         method: 'GET',
         headers: this.headers,
       });

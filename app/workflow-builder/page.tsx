@@ -36,14 +36,19 @@ import {
   LogOut,
   Settings2,
   X,
+  Save,
+  Bookmark,
+  Trash2,
 } from 'lucide-react';
+import { useWorkflowStore } from '@/lib/store/workflow-store';
+import type { SavedWorkflow } from '@/lib/store/workflow-store';
 
 const fieldLabel =
   'text-[11px] font-medium text-muted-foreground uppercase tracking-wider';
 const inputBase =
   'w-full h-9 rounded-md border border-border bg-input text-foreground text-sm px-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
-type DrawerMode = 'none' | 'node' | 'settings' | 'output' | 'code';
+type DrawerMode = 'none' | 'node' | 'settings' | 'output' | 'code' | 'saved';
 
 function blankSpec(name: string): GraphAgentSpec {
   return {
@@ -116,6 +121,10 @@ export default function GraphWorkflowPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GraphWorkflowOutput | null>(null);
+
+  const saveWorkflow = useWorkflowStore((s) => s.saveWorkflow);
+  const deleteWorkflow = useWorkflowStore((s) => s.deleteWorkflow);
+  const savedWorkflows = useWorkflowStore((s) => s.savedWorkflows);
 
   const meta: WorkflowMeta = useMemo(
     () => ({ name, task, maxLoops, autoCompile, verbose, img }),
@@ -242,21 +251,46 @@ export default function GraphWorkflowPage() {
         throw new Error(data?.error || `Request failed (${res.status})`);
       }
       setResult(data as GraphWorkflowOutput);
+      saveWorkflow({ name, nodes, edges, meta, result: data as GraphWorkflowOutput, error: null });
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to run workflow');
     } finally {
       setIsRunning(false);
     }
-  }, [issues.length, isRunning, payload]);
+  }, [issues.length, isRunning, payload, name, nodes, edges, meta, saveWorkflow]);
 
   const canRun = !isRunning && issues.length === 0;
+
+  const handleSave = useCallback(() => {
+    saveWorkflow({ name, nodes, edges, meta, result, error });
+  }, [name, nodes, edges, meta, result, error, saveWorkflow]);
+
+  const handleLoad = useCallback(
+    (id: string) => {
+      const wf = useWorkflowStore.getState().getWorkflow(id);
+      if (!wf) return;
+      setNodes(wf.nodes);
+      setEdges(wf.edges);
+      setName(wf.name);
+      setTask(wf.meta.task);
+      setMaxLoops(wf.meta.maxLoops);
+      setAutoCompile(wf.meta.autoCompile);
+      setVerbose(wf.meta.verbose);
+      setImg(wf.meta.img);
+      setResult(wf.result);
+      setError(wf.error);
+      setSelectedNodeId(null);
+      setDrawer('none');
+    },
+    [setNodes, setEdges]
+  );
 
   const toggleDrawer = (mode: Exclude<DrawerMode, 'none' | 'node'>) => {
     setDrawer((d) => (d === mode ? 'none' : mode));
     setSelectedNodeId(null);
   };
 
-  const wide = drawer === 'code' || drawer === 'output';
+  const wide = drawer === 'code' || drawer === 'output' || drawer === 'saved';
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-background">
@@ -326,6 +360,18 @@ export default function GraphWorkflowPage() {
               label="Output"
               active={drawer === 'output'}
             />
+            <span className="w-px h-5 bg-border mx-0.5" />
+            <ToolbarButton
+              onClick={handleSave}
+              icon={<Save className="w-4 h-4" />}
+              label="Save"
+            />
+            <ToolbarButton
+              onClick={() => toggleDrawer('saved')}
+              icon={<Bookmark className="w-4 h-4" />}
+              label="Saved"
+              active={drawer === 'saved'}
+            />
           </div>
         </div>
 
@@ -342,6 +388,7 @@ export default function GraphWorkflowPage() {
                 {drawer === 'settings' && 'Workflow settings'}
                 {drawer === 'code' && 'Export code'}
                 {drawer === 'output' && 'Run output'}
+                {drawer === 'saved' && 'Saved workflows'}
               </span>
               <button
                 type="button"
@@ -430,6 +477,13 @@ export default function GraphWorkflowPage() {
                     </p>
                   </div>
                 ))}
+              {drawer === 'saved' && (
+                <SavedWorkflowsPanel
+                  workflows={savedWorkflows}
+                  onLoad={handleLoad}
+                  onDelete={deleteWorkflow}
+                />
+              )}
             </div>
           </aside>
         )}
@@ -471,7 +525,91 @@ export default function GraphWorkflowPage() {
             {isRunning ? 'Running…' : 'Run'}
           </button>
         </div>
+    </div>
+  );
+}
+
+function SavedWorkflowsPanel({
+  workflows,
+  onLoad,
+  onDelete,
+}: {
+  workflows: SavedWorkflow[];
+  onLoad: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (workflows.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border bg-subtle/50 p-10 text-center">
+        <Bookmark className="w-5 h-5 mx-auto mb-3 text-muted-foreground" />
+        <p className="text-sm font-semibold text-foreground mb-1">
+          No saved workflows
+        </p>
+        <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+          Click <span className="font-medium text-foreground">Save</span> in the
+          toolbar to save your current workflow, or run it to auto-save.
+        </p>
       </div>
+    );
+  }
+
+  const sorted = [...workflows].sort(
+    (a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
+  );
+
+  return (
+    <div className="space-y-2">
+      {sorted.map((wf) => (
+        <div
+          key={wf.id}
+          className="rounded-lg border border-border bg-card p-3 space-y-2"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {wf.name || 'Untitled workflow'}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {wf.nodes.length} agent{wf.nodes.length === 1 ? '' : 's'} ·{' '}
+                {wf.edges.length} edge{wf.edges.length === 1 ? '' : 's'}
+                {wf.result && (
+                  <span className="ml-2 inline-flex items-center gap-1">
+                    <span
+                      className={`inline-block w-1.5 h-1.5 rounded-full ${
+                        wf.result.status === 'completed'
+                          ? 'bg-success'
+                          : 'bg-warning'
+                      }`}
+                    />
+                    {wf.result.status}
+                  </span>
+                )}
+              </p>
+              <p className="text-[10px] text-muted-foreground/60">
+                {new Date(wf.savedAt).toLocaleString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => onLoad(wf.id)}
+                className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-foreground text-background text-xs font-medium hover:bg-foreground/90 transition-colors"
+              >
+                Load
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(wf.id)}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
+                aria-label="Delete workflow"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

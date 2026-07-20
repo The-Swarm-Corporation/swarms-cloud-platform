@@ -52,7 +52,7 @@ export function ExecutionHistoryPreview({
         </div>
       ) : recent.length === 0 ? (
         <p className="text-xs text-muted-foreground py-8 text-center">
-          No executions yet — runs will appear here.
+          No executions yet. Runs will appear here.
         </p>
       ) : (
         <ul className="divide-y divide-border -mx-1">

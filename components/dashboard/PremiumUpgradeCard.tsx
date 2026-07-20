@@ -84,7 +84,7 @@ const PREMIUM_PRO_VARIANT: Variant = {
     {
       icon: Zap,
       title: 'More rate limits',
-      description: 'The highest request ceilings on the platform — scale without throttling.',
+      description: 'The highest request ceilings on the platform. Scale without throttling.',
     },
     {
       icon: Cpu,
@@ -120,7 +120,7 @@ const PREMIUM_DEFAULT_VARIANT: Variant = {
     {
       icon: Shield,
       title: 'Priority compute',
-      description: 'Dedicated lane during peak traffic — no queueing.',
+      description: 'Dedicated lane during peak traffic, no queueing.',
     },
     {
       icon: Headphones,

@@ -7,9 +7,9 @@ import { JsonLd } from '@/components/seo/JsonLd';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Playground — Run Multi-Agent Swarms in Your Browser',
+  title: 'Playground: Run Multi-Agent Swarms in Your Browser',
   description:
-    'Compose, configure, and run multi-agent swarms in the browser. Experiment with 17+ collaboration patterns, models, and tools on Swarms Cloud — no setup, no install, no code required to start.',
+    'Compose, configure, and run multi-agent swarms in the browser. Experiment with 17+ collaboration patterns, models, and tools on Swarms Cloud. No setup, no install, no code required to start.',
   path: '/playground',
   keywords: [
     'agent playground',

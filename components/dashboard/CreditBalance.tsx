@@ -48,7 +48,7 @@ export function CreditBalance() {
           {formatCredits(total)}
         </span>
       ) : (
-        <span className="text-muted-foreground tabular-nums">—</span>
+        <span className="text-muted-foreground tabular-nums"> - </span>
       )}
     </Link>
   );

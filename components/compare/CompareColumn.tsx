@@ -289,7 +289,7 @@ export function CompareColumn({
                 value={
                   typeof durationMs === 'number'
                     ? `${(durationMs / 1000).toFixed(2)}s`
-                    : '—'
+                    : ' - '
                 }
               />
               <Stat
@@ -297,7 +297,7 @@ export function CompareColumn({
                 value={
                   typeof result.usage?.total_tokens === 'number'
                     ? result.usage.total_tokens.toLocaleString()
-                    : '—'
+                    : ' - '
                 }
               />
               <Stat
@@ -305,7 +305,7 @@ export function CompareColumn({
                 value={
                   typeof result.usage?.total_cost === 'number'
                     ? `$${result.usage.total_cost.toFixed(4)}`
-                    : '—'
+                    : ' - '
                 }
               />
             </div>

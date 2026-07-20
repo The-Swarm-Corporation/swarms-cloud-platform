@@ -3,9 +3,9 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Swarm Types — 17+ Multi-Agent Architectures',
+  title: 'Swarm Types - 17+ Multi-Agent Architectures',
   description:
-    'Explore every multi-agent architecture supported by the Swarms API — Hierarchical Swarm, Sequential Workflow, Concurrent Workflow, Mixture of Agents, Council as a Judge, Debate with Judge, Multi-Agent Router, Auto Swarm Builder, and more.',
+    'Explore every multi-agent architecture supported by the Swarms API - Hierarchical Swarm, Sequential Workflow, Concurrent Workflow, Mixture of Agents, Council as a Judge, Debate with Judge, Multi-Agent Router, Auto Swarm Builder, and more.',
   path: '/swarms',
   keywords: [
     'multi-agent architectures',

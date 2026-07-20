@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 /**
  * Every proxied /api/* route should refuse to call upstream without an
  * API key. We send no x-api-key header and rely on the test process not
- * having SWARMS_API_KEY in env — if it does, these still pass against
+ * having SWARMS_API_KEY in env - if it does, these still pass against
  * routes that gate on header first, but the validation tests below cover
  * the rest.
  */

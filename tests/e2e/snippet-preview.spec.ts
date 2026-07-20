@@ -24,7 +24,7 @@ test.describe('Playground snippet preview', () => {
       page.getByText('/v1/swarm/completions').first()
     ).toBeVisible();
 
-    // cURL is the default tab — code includes a curl command
+    // cURL is the default tab - code includes a curl command
     await expect(page.locator('pre code').first()).toContainText('curl');
 
     // Switch to TypeScript; code body should switch to fetch

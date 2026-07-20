@@ -54,7 +54,7 @@ export async function signInWithPhantom(): Promise<void> {
     if (code === 4001) {
       throw new Error('Connection request was rejected.');
     }
-    // Already connected returns code -32002 or "already connected" — that's
+    // Already connected returns code -32002 or "already connected" - that's
     // fine, fall through and let signInWithWeb3 use the existing session.
     const message = (err as Error).message ?? '';
     if (

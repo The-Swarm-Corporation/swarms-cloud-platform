@@ -48,7 +48,7 @@ export const APP_CATEGORIES: Record<
   operate: {
     label: 'Operate',
     description:
-      'Run and monitor the platform — dashboards, telemetry, and execution history.',
+      'Run and monitor the platform - dashboards, telemetry, and execution history.',
   },
   build: {
     label: 'Build',
@@ -110,7 +110,7 @@ export const APPS: AppEntry[] = [
     label: 'Dashboard',
     description: 'Overview, metrics, and rate-limit monitoring.',
     longDescription:
-      'Real-time analytics for your Swarms workspace — agent counts, executions, success rate, and rate-limit windows across minute/hour/day.',
+      'Real-time analytics for your Swarms workspace - agent counts, executions, success rate, and rate-limit windows across minute/hour/day.',
     keywords: ['home', 'overview', 'analytics', 'metrics', 'stats', 'rate limits'],
     icon: LayoutGrid,
     category: 'operate',
@@ -132,7 +132,7 @@ export const APPS: AppEntry[] = [
     label: 'Observability',
     description: 'Monitor latency, errors, and performance.',
     longDescription:
-      'Real-time monitoring for API requests — latency, error rates, cache hit rate, and rate-limit windows across every agent and swarm execution.',
+      'Real-time monitoring for API requests - latency, error rates, cache hit rate, and rate-limit windows across every agent and swarm execution.',
     keywords: [
       'monitoring',
       'latency',
@@ -151,7 +151,7 @@ export const APPS: AppEntry[] = [
     label: 'Token usage',
     description: 'Track token usage and cost over time.',
     longDescription:
-      'Charts of input/output tokens and cost across your completions — by day, week, or month, grouped by agent or API key, with filters, a table view, and CSV export.',
+      'Charts of input/output tokens and cost across your completions - by day, week, or month, grouped by agent or API key, with filters, a table view, and CSV export.',
     keywords: [
       'usage',
       'tokens',
@@ -193,7 +193,7 @@ export const APPS: AppEntry[] = [
     label: 'Workbench',
     description: 'Build, configure, and run agents.',
     longDescription:
-      'Author single agents — model, prompt, temperature, tools — and execute them against the production Swarms API in one click.',
+      'Author single agents - model, prompt, temperature, tools - and execute them against the production Swarms API in one click.',
     keywords: ['build', 'create', 'configure', 'run', 'editor', 'IDE'],
     icon: Hammer,
     category: 'build',
@@ -276,7 +276,7 @@ export const APPS: AppEntry[] = [
     label: 'Models',
     description: 'Browse available AI models for agents and swarms.',
     longDescription:
-      'Live model catalog from /v1/models/available — GPT, Claude, Gemini, Llama and more. Cached for 10 hours; refresh on demand.',
+      'Live model catalog from /v1/models/available - GPT, Claude, Gemini, Llama and more. Cached for 10 hours; refresh on demand.',
     keywords: ['llm', 'ai', 'catalog', 'providers', 'gpt', 'claude'],
     icon: Cpu,
     category: 'catalog',
@@ -287,7 +287,7 @@ export const APPS: AppEntry[] = [
     label: 'Swarm types',
     description: 'Multi-agent architectures supported by the Swarms API.',
     longDescription:
-      'Every architecture from /v1/swarms/available with descriptions — Hierarchical, Sequential, Concurrent, Mixture of Agents, Council, Debate, Router, Auto Builder, and more.',
+      'Every architecture from /v1/swarms/available with descriptions - Hierarchical, Sequential, Concurrent, Mixture of Agents, Council, Debate, Router, Auto Builder, and more.',
     keywords: [
       'architecture',
       'topology',
@@ -404,7 +404,7 @@ export const APPS: AppEntry[] = [
     label: 'Learn more',
     description: 'Product overview of The Swarms Cloud.',
     longDescription:
-      'The Swarms Cloud in one page — capabilities, all 16 swarm architectures, the management console, global infrastructure, pricing, and SDKs.',
+      'The Swarms Cloud in one page - capabilities, all 16 swarm architectures, the management console, global infrastructure, pricing, and SDKs.',
     keywords: [
       'about',
       'overview',

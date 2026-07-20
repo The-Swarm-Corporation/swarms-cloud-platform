@@ -85,7 +85,7 @@ export function GraphResults({ result }: { result: GraphWorkflowOutput }) {
           value={
             typeof result.usage?.total_tokens === 'number'
               ? result.usage.total_tokens.toLocaleString()
-              : '—'
+              : ' - '
           }
         />
         <Stat
@@ -94,7 +94,7 @@ export function GraphResults({ result }: { result: GraphWorkflowOutput }) {
           value={
             typeof result.usage?.token_cost === 'number'
               ? `$${result.usage.token_cost.toFixed(4)}`
-              : '—'
+              : ' - '
           }
         />
       </div>
@@ -189,7 +189,7 @@ function NodeOutput({
         }`}
       >
         <pre className="text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap break-words font-mono">
-          {text || '—'}
+          {text || ' - '}
         </pre>
       </div>
     </div>

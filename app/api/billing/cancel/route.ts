@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json().catch(() => ({}))) as { resume?: boolean };
     resume = Boolean(body?.resume);
   } catch {
-    // no body — treat as cancel
+    // no body - treat as cancel
   }
 
   const { data } = await admin

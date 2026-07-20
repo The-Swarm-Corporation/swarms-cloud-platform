@@ -14,7 +14,7 @@ export interface ApiKeyRow {
 export interface CreatedApiKey {
   id: string;
   name: string | null;
-  /** The full key — shown once, never retrievable again. */
+  /** The full key - shown once, never retrievable again. */
   key: string;
   created_at: string;
 }

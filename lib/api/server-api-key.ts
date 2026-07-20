@@ -16,7 +16,7 @@ const inFlightCreates = new Map<string, Promise<string | null>>();
 /**
  * Return the user's newest active API key, creating one (named
  * `AUTO_CREATED_KEY_NAME`) if the user has none. Every signed-in user is
- * guaranteed a key of their own — there is deliberately no shared fallback.
+ * guaranteed a key of their own - there is deliberately no shared fallback.
  */
 export async function ensureApiKeyForUser(
   admin: SupabaseClient,
@@ -83,9 +83,9 @@ export async function ensureApiKeyForUser(
  * Resolve the Swarms API key for the current request: the signed-in user's
  * own key from `swarms_cloud_api_keys`, auto-created on first use if missing.
  *
- * Returns null when there is no authenticated user — there is no environment
+ * Returns null when there is no authenticated user - there is no environment
  * fallback, because a shared key would let one account see another account's
- * upstream data. The key is also never sourced from a request header — that
+ * upstream data. The key is also never sourced from a request header - that
  * would let a signed-in user impersonate another user's key by spoofing
  * `x-api-key`.
  */

@@ -435,7 +435,7 @@ export default function GraphWorkflowPage() {
         )}
         </div>
 
-        {/* Task command bar — pinned to the viewport bottom (always visible) */}
+        {/* Task command bar - pinned to the viewport bottom (always visible) */}
         <div className="fixed bottom-0 inset-x-0 z-40 h-14 border-t border-border bg-card px-3 sm:px-4 flex items-center gap-3">
           <span className="hidden sm:inline text-[11px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">
             Task
@@ -613,7 +613,7 @@ function WorkflowSettings({
           names={endPoints}
         />
         <p className="text-[11px] text-muted-foreground">
-          Derived automatically — nodes with no incoming edge start the flow;
+          Derived automatically - nodes with no incoming edge start the flow;
           nodes with no outgoing edge end it.
         </p>
       </div>
@@ -691,7 +691,7 @@ function EndpointList({
       </span>
       <div className="flex flex-wrap gap-1 min-w-0">
         {names.length === 0 ? (
-          <span className="text-muted-foreground/60">—</span>
+          <span className="text-muted-foreground/60"> - </span>
         ) : (
           names.map((n) => (
             <span

@@ -494,7 +494,7 @@ function extractErrorMessage(log: SwarmLogEntry): string | null {
 }
 
 function formatNumber(n: number): string {
-  if (!Number.isFinite(n)) return '—';
+  if (!Number.isFinite(n)) return ' - ';
   if (Math.abs(n) >= 1000) {
     return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
   }

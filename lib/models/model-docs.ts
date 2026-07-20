@@ -10,7 +10,7 @@ import { SITE } from '@/lib/seo';
 
 const API_BASE_URL = 'https://api.swarms.world';
 // SITE.url falls back to swarms.ai when NEXT_PUBLIC_SITE_URL isn't set, but
-// this app only ever runs at cloud.swarms.world — hardcode it so the docs
+// this app only ever runs at cloud.swarms.world - hardcode it so the docs
 // links are always correct regardless of env config.
 export const CLOUD_URL = 'https://cloud.swarms.world';
 

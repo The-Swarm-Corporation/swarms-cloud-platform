@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  * paid endpoints (no /api/agents POST, no /api/swarm POST,
  * no /api/prompt-generator POST).
  */
-test.describe('Live upstream — read endpoints', () => {
+test.describe('Live upstream - read endpoints', () => {
   test.skip(
     !process.env.SWARMS_API_KEY,
     'SWARMS_API_KEY required for live upstream tests.'
@@ -29,7 +29,7 @@ test.describe('Live upstream — read endpoints', () => {
     const res = await request.get('/api/models', { headers: headers() });
     expect(res.ok()).toBe(true);
     const body = await res.json();
-    // The payload shape is loose — just confirm it's an object/array
+    // The payload shape is loose - just confirm it's an object/array
     expect(body).toBeDefined();
     expect(typeof body).toBe('object');
   });

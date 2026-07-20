@@ -7,7 +7,7 @@ import type {
 
 // React Flow node data carries the agent spec. The node id is a stable internal
 // identifier (independent of agent_name) so renaming an agent never breaks the
-// edges that connect to it — names are resolved to ids only when building the
+// edges that connect to it - names are resolved to ids only when building the
 // API payload.
 export type AgentNodeData = {
   spec: GraphAgentSpec;

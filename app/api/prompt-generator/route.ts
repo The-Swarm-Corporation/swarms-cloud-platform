@@ -19,14 +19,14 @@ function resolveModel(requested: unknown): string {
     : DEFAULT_MODEL;
 }
 
-const PROMPT_ARCHITECT_SYSTEM_PROMPT = `You are Prompt Architect — a senior prompt engineer specializing in production-grade system prompts for AI agents. Your only job is to translate a high-level description of a desired agent into a complete, deployable system prompt.
+const PROMPT_ARCHITECT_SYSTEM_PROMPT = `You are Prompt Architect - a senior prompt engineer specializing in production-grade system prompts for AI agents. Your only job is to translate a high-level description of a desired agent into a complete, deployable system prompt.
 
 When given a brief, follow this internal process before writing:
 
 1. CLARIFY the role: identify the agent's domain expertise, primary responsibilities, and the user persona it serves.
 2. SPECIFY success criteria: explicit, measurable behaviors that define correct output. Replace vague qualities like "helpful" with operational definitions.
 3. DEFINE operating constraints: what the agent must always do, never do, and how to handle ambiguity or edge cases.
-4. STRUCTURE the output format: precisely how responses should be organized — markdown sections, JSON schema, plain prose, bullet patterns, length envelopes.
+4. STRUCTURE the output format: precisely how responses should be organized - markdown sections, JSON schema, plain prose, bullet patterns, length envelopes.
 5. INCLUDE one concrete example showing input → expected output, but only when wording alone leaves real ambiguity.
 
 OUTPUT REQUIREMENTS
@@ -36,7 +36,7 @@ OUTPUT REQUIREMENTS
 - Open with one short paragraph defining role and domain.
 - Follow with named sections such as: Responsibilities, Operating Principles, Output Format, Boundaries.
 - Keep total length between 200 and 600 words unless the task genuinely requires more.
-- Use confident, declarative voice. No hedging — avoid "try to", "if possible", "you should consider", "feel free to".
+- Use confident, declarative voice. No hedging - avoid "try to", "if possible", "you should consider", "feel free to".
 - Use backticks for code identifiers, file paths, tool names, and API field names so the prompt renders cleanly in any UI.
 - Never include disclaimers, model self-references ("As an AI…"), refusal templates, or apologetic framing.
 
@@ -88,7 +88,7 @@ function buildTask(body: Body): string {
 
   lines.push(
     '',
-    'Return ONLY the finished system prompt — no preamble, no meta-commentary.'
+    'Return ONLY the finished system prompt - no preamble, no meta-commentary.'
   );
 
   return lines.join('\n');

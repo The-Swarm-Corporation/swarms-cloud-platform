@@ -123,7 +123,7 @@ export const SWARM_TYPE_DESCRIPTIONS: Record<SwarmType, string> = {
   MultiAgentRouter: 'Router picks the best agent for each task.',
   AgentRearrange: 'Custom flow string defines how agents pass work.',
   AutoSwarmBuilder: 'Auto-generates a swarm structure from the task.',
-  HeavySwarm: 'Heavy reasoning swarm — slow but thorough.',
+  HeavySwarm: 'Heavy reasoning swarm - slow but thorough.',
   BatchedGridWorkflow: 'Grid of agents processes tasks in batches.',
   auto: 'Let Swarms choose the best swarm type for the task.',
 };

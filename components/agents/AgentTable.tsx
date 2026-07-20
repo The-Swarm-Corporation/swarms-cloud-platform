@@ -160,7 +160,7 @@ export function AgentTable({
                           className="text-xs text-muted-foreground truncate max-w-[280px]"
                           title={agent.config.description || undefined}
                         >
-                          {agent.config.description || '—'}
+                          {agent.config.description || ' - '}
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
@@ -215,7 +215,7 @@ export function AgentTable({
                             the current breakpoint; the width-0/min-w-full/overflow-hidden
                             wrapper stops this cell's wide content (raw JSON, code
                             snippets) from ever being used to compute the table's
-                            (auto-layout) column widths — without it, other rows'
+                            (auto-layout) column widths - without it, other rows'
                             columns get corrupted once this row is expanded. */}
                         <td colSpan={100} className="p-0">
                           <div className="w-0 min-w-full overflow-hidden px-4">

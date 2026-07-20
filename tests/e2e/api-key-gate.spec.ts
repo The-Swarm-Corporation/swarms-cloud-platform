@@ -6,7 +6,7 @@ test.describe('API key gate', () => {
     await clearAppStorage(page);
     await page.goto('/');
 
-    // The gate prompts for a Swarms API key — any heading or text
+    // The gate prompts for a Swarms API key - any heading or text
     // mentioning "api key" within a dialog/modal counts.
     await expect(
       page.getByText(/swarms[_ ]?api[_ ]?key|enter your api key/i).first()

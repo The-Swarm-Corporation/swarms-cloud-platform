@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
  * Map of HTTP status codes to user-safe messages. Used as the fallback when no
  * actionable upstream detail is available, and as the message for 5xx errors
  * (which may carry internal detail we must never echo). For 4xx the upstream
- * detail is preferred — see `SURFACE_DETAIL_STATUSES` below.
+ * detail is preferred - see `SURFACE_DETAIL_STATUSES` below.
  */
 const SAFE_MESSAGE_BY_STATUS: Record<number, string> = {
   400: 'Bad request.',
@@ -26,8 +26,8 @@ const SAFE_MESSAGE_BY_STATUS: Record<number, string> = {
 
 /**
  * Client-error (4xx) statuses whose upstream detail describes the *caller's own
- * request* — a restricted/unknown model, an out-of-range field, a missing task,
- * an exhausted quota — and is therefore safe and genuinely useful to surface so
+ * request* - a restricted/unknown model, an out-of-range field, a missing task,
+ * an exhausted quota - and is therefore safe and genuinely useful to surface so
  * the user can fix it. The Swarms API authors these messages itself (they are
  * not stack traces; those only come from 5xx, which we never surface).
  *
@@ -49,7 +49,7 @@ function pickStatus(error: unknown): number {
   const raw = e?.status;
   if (typeof raw === 'number' && raw >= 400 && raw < 600) return raw;
   // The API client reports a network-level failure reaching the upstream Swarms
-  // API as status 0 — surface that as a Bad Gateway, not an ambiguous 500.
+  // API as status 0 - surface that as a Bad Gateway, not an ambiguous 500.
   if (raw === 0) return 502;
   return 500;
 }
@@ -59,7 +59,7 @@ function pickStatus(error: unknown): number {
  * messages are authored by the Swarms API, so this only normalises whitespace,
  * caps length so a large body can't flood the UI, and strips the few things
  * that should never appear in a client-facing message anyway (absolute
- * filesystem paths, a Python traceback) just in case. URLs are preserved —
+ * filesystem paths, a Python traceback) just in case. URLs are preserved  - 
  * the API's 4xx copy intentionally links to docs and the upgrade page.
  */
 function sanitizeDetail(message: string | undefined): string | undefined {
@@ -106,7 +106,7 @@ export function jsonErrorFromUnknown(
     SAFE_MESSAGE_BY_STATUS[status] ?? SAFE_MESSAGE_BY_STATUS[500];
 
   // Prefer the upstream detail for client errors so the message is actionable
-  // (e.g. "model 'gpt-5.4' requires a premium plan — try gpt-4o, or upgrade")
+  // (e.g. "model 'gpt-5.4' requires a premium plan - try gpt-4o, or upgrade")
   // instead of a generic "Bad request." 5xx stays generic.
   let message = safeMessage;
   if (SURFACE_DETAIL_STATUSES.has(status)) {

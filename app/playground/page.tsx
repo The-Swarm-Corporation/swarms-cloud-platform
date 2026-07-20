@@ -221,7 +221,7 @@ export default function PlaygroundPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6">
-            {/* LEFT — config column */}
+            {/* LEFT - config column */}
             <div className="space-y-5">
               <section className="rounded-lg border border-border bg-card p-4 sm:p-5 space-y-4">
                 <div className="flex items-center justify-between">
@@ -402,7 +402,7 @@ export default function PlaygroundPage() {
               </div>
             </div>
 
-            {/* RIGHT — output column */}
+            {/* RIGHT - output column */}
             <div className="space-y-5 min-w-0">
               {isRunning && (
                 <div className="rounded-lg border border-border bg-card p-10 text-center">

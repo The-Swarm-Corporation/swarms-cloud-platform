@@ -3,7 +3,7 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Compare Agents — Run Models Side by Side',
+  title: 'Compare Agents - Run Models Side by Side',
   description:
     'Run the same task through 2 or more agents at once and compare their responses side by side. Test different models, prompts, and saved agent configurations from your Swarms Cloud workspace through the Agent Completions API.',
   path: '/compare',

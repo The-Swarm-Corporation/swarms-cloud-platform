@@ -2,7 +2,7 @@
 
 **Build, deploy, and scale multi-agent systems for any application.**
 
-Swarms Cloud is the operator console for the Swarms API — an enterprise-grade
+Swarms Cloud is the operator console for the Swarms API - an enterprise-grade
 control plane for designing, executing, and observing single agents, reasoning
 agents, and multi-agent swarms across 17+ orchestration architectures. It pairs
 a production-ready Rust agent runtime on the back end with a fast, themeable
@@ -12,7 +12,7 @@ Next.js front end on the desk.
 
 
 Swarms Cloud is the official browser-based console for the Swarms API. It
-provides a single workspace for the full multi-agent lifecycle — agent
+provides a single workspace for the full multi-agent lifecycle - agent
 authoring, model selection, swarm composition, execution, telemetry,
 rate-limit and credit monitoring, and cost forecasting.
 
@@ -78,8 +78,8 @@ browser; the client speaks only to the Next.js routes.
 
 State is managed with Zustand stores:
 
-- `lib/store/ui-store.ts` — UI state, toasts, API key, theme
-- `lib/store/agent-store.ts` — local agent metadata and execution history
+- `lib/store/ui-store.ts` - UI state, toasts, API key, theme
+- `lib/store/agent-store.ts` - local agent metadata and execution history
 
 ## Prerequisites
 
@@ -99,8 +99,8 @@ pnpm install
 ## Environment
 
 Create `.env` at the project root and populate the variables you need.
-None are strictly required at boot — the app will prompt for an API key on
-first load if `SWARMS_API_KEY` is unset — but production deployments should
+None are strictly required at boot - the app will prompt for an API key on
+first load if `SWARMS_API_KEY` is unset - but production deployments should
 configure all of the relevant ones.
 
 ```dotenv
@@ -201,7 +201,7 @@ The Swarms API key is missing, invalid, or lacks permission. Confirm
 **Credits or models look stale**
 
 Both endpoints cache aggressively (24 h and 10 h respectively). Click the
-Refresh button on the page — the UI calls the route with `?refresh=1`, which
+Refresh button on the page - the UI calls the route with `?refresh=1`, which
 bypasses the cache.
 
 **Build fails with `useSearchParams() should be wrapped in a suspense

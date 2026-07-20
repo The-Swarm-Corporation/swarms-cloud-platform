@@ -31,7 +31,7 @@ export function ThemeSwitcher({ compact = false }: ThemeSwitcherProps) {
         type="button"
         onClick={() => setTheme(next.value)}
         className="inline-flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        title={`Theme: ${current.label} — click for ${next.label}`}
+        title={`Theme: ${current.label} - click for ${next.label}`}
         aria-label={`Switch theme (currently ${current.label})`}
       >
         <Icon className="w-3.5 h-3.5" />

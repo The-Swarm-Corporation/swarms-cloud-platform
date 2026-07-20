@@ -25,7 +25,7 @@ interface HistoryRow {
 }
 
 function money(amount: number | null, currency: string): string {
-  if (amount == null) return '—';
+  if (amount == null) return ' - ';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency || 'USD',
@@ -223,7 +223,7 @@ export function BillingHistory() {
                               <ExternalLink className="w-3 h-3" />
                             </a>
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="text-xs text-muted-foreground"> - </span>
                           )}
                         </td>
                       </tr>

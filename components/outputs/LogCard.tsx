@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 function formatDate(timestamp: string | null): string {
-  if (!timestamp) return '—';
+  if (!timestamp) return ' - ';
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return timestamp;
   return date.toLocaleString('en-US', {

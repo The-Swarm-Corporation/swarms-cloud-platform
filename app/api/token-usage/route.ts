@@ -8,7 +8,7 @@ const PAGE_SIZE = 1000;
 const MAX_PAGES = 20;
 
 // Logs only append with now() timestamps, so a period that has fully elapsed
-// is immutable — cache it much longer than the still-accumulating current one.
+// is immutable - cache it much longer than the still-accumulating current one.
 const CACHE_TTL_CURRENT_MS = 60_000;
 const CACHE_TTL_PAST_MS = 60 * 60_000;
 const MAX_CACHE_ENTRIES = 200;

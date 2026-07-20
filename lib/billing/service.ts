@@ -66,7 +66,7 @@ export async function applySubscription(
   };
 
   const { error } = await admin.from('subscriptions').upsert(row);
-  // If the price isn't present in `prices` yet, the FK fails — persist the row
+  // If the price isn't present in `prices` yet, the FK fails - persist the row
   // without the price reference so status/entitlement still sync.
   if (error && /foreign key|price_id|violates/i.test(error.message)) {
     await admin.from('subscriptions').upsert({ ...row, price_id: null });

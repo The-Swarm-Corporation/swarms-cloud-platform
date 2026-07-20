@@ -121,7 +121,7 @@ export function RecentAgentsCard({
                     </td>
                     <td className="py-2 pr-2 hidden sm:table-cell">
                       <span className="text-muted-foreground font-mono text-[11px] truncate">
-                        {a.model ?? '—'}
+                        {a.model ?? ' - '}
                       </span>
                     </td>
                     <td className="py-2 text-right tabular-nums text-foreground">
@@ -148,7 +148,7 @@ export function RecentAgentsCard({
 }
 
 function formatRelative(timestamp: number | null): string {
-  if (timestamp === null) return '—';
+  if (timestamp === null) return ' - ';
   const diff = Date.now() - timestamp;
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return 'now';

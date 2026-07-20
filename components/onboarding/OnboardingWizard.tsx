@@ -60,7 +60,7 @@ const STEPS: {
     step: 1,
     title: 'Create an API key',
     description:
-      'We made you a "Default" key for the dashboard — create your own to call the Swarms API from your apps.',
+      'We made you a "Default" key for the dashboard - create your own to call the Swarms API from your apps.',
     icon: KeyRound,
   },
   {
@@ -131,7 +131,7 @@ function EligibilityCheck() {
 
   useEffect(() => {
     if (keysLoading) return;
-    // Inconclusive on fetch errors — retry on the next full page load.
+    // Inconclusive on fetch errors - retry on the next full page load.
     if (keysError || keys === null) return;
 
     if (keys.some(isUserCreatedKey)) {
@@ -253,7 +253,7 @@ function OnboardingFlow({ pathname }: { pathname: string }) {
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            There&apos;s a lot more to the cloud — here are some good next
+            There&apos;s a lot more to the cloud - here are some good next
             stops:
           </p>
           <div className="space-y-2">
@@ -342,7 +342,7 @@ function stepCardContent(
     if (pathname === '/api-keys') {
       return {
         title: 'Create your API key',
-        body: 'Use the "Create key" button above and copy your new key — we’ll move on automatically once it’s made.',
+        body: 'Use the "Create key" button above and copy your new key - we’ll move on automatically once it’s made.',
       };
     }
     return {
@@ -355,12 +355,12 @@ function stepCardContent(
     if (pathname === '/models' || pathname.startsWith('/models/')) {
       return {
         title: 'Find your favorite models',
-        body: 'Browse the catalog and open a few models that fit your use case — your agents can run on any of them.',
+        body: 'Browse the catalog and open a few models that fit your use case - your agents can run on any of them.',
         action: { label: 'Next: the playground', icon: ArrowRight, run: 'advance', to: 3 },
       };
     }
     return {
-      title: 'Key created — nice!',
+      title: 'Key created - nice!',
       body: 'Next: browse the model catalog and find the models you want your agents to use.',
       action: { label: 'Browse the models', icon: Boxes, run: 'navigate', to: '/models' },
     };

@@ -28,7 +28,7 @@ test.describe.configure({ mode: 'serial' });
 test.describe('Cache header contract', () => {
   test.skip(
     !process.env.SWARMS_API_KEY,
-    'SWARMS_API_KEY required — cache headers are only set after a successful upstream call.'
+    'SWARMS_API_KEY required - cache headers are only set after a successful upstream call.'
   );
 
   for (const { path, maxAgeSeconds } of CACHED) {

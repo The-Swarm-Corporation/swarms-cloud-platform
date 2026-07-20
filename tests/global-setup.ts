@@ -41,7 +41,7 @@ export default async function globalSetup() {
   const baseCount = loadDotEnv('.env');
   const hasKey = !!process.env.SWARMS_API_KEY;
   console.log(
-    `[playwright] env loaded — .env: ${baseCount}, SWARMS_API_KEY: ${
+    `[playwright] env loaded - .env: ${baseCount}, SWARMS_API_KEY: ${
       hasKey ? 'present' : 'missing'
     }`
   );

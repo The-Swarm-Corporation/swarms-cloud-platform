@@ -106,7 +106,7 @@ export function SwarmOutput({ result }: SwarmOutputProps) {
         <Stat
           icon={<Users className="w-3 h-3 text-accent" />}
           label="Agents"
-          value={result.number_of_agents?.toString() ?? '—'}
+          value={result.number_of_agents?.toString() ?? ' - '}
         />
         <Stat
           icon={<Clock className="w-3 h-3 text-accent" />}
@@ -114,7 +114,7 @@ export function SwarmOutput({ result }: SwarmOutputProps) {
           value={
             typeof result.execution_time === 'number'
               ? `${result.execution_time.toFixed(2)}s`
-              : '—'
+              : ' - '
           }
         />
         <Stat
@@ -123,7 +123,7 @@ export function SwarmOutput({ result }: SwarmOutputProps) {
           value={
             typeof result.usage?.total_tokens === 'number'
               ? result.usage.total_tokens.toLocaleString()
-              : '—'
+              : ' - '
           }
         />
         <Stat
@@ -132,7 +132,7 @@ export function SwarmOutput({ result }: SwarmOutputProps) {
           value={
             typeof result.usage?.total_cost === 'number'
               ? `$${result.usage.total_cost.toFixed(4)}`
-              : '—'
+              : ' - '
           }
         />
       </div>

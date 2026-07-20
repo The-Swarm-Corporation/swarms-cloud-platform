@@ -14,7 +14,7 @@ export type LogSortKey = 'timestamp' | 'agent' | 'tokens' | 'cost';
 export type LogSortOrder = 'asc' | 'desc';
 
 function formatDate(timestamp: string | null): { date: string; time: string } {
-  if (!timestamp) return { date: '—', time: '' };
+  if (!timestamp) return { date: ' - ', time: '' };
   const d = new Date(timestamp);
   if (Number.isNaN(d.getTime())) return { date: timestamp, time: '' };
   return {
@@ -259,7 +259,7 @@ function LogRow({
         </td>
         <td className="px-4 py-3 align-middle hidden lg:table-cell max-w-[320px]">
           <div className="text-xs text-muted-foreground truncate">
-            {entry.task || <span className="text-muted-foreground/50">—</span>}
+            {entry.task || <span className="text-muted-foreground/50"> - </span>}
           </div>
         </td>
         <td className="px-4 py-3 text-right align-middle hidden sm:table-cell">
@@ -271,7 +271,7 @@ function LogRow({
               {compactNumber(tokens)}
             </span>
           ) : (
-            <span className="text-muted-foreground/50">—</span>
+            <span className="text-muted-foreground/50"> - </span>
           )}
         </td>
         <td className="px-4 py-3 text-right align-middle hidden md:table-cell">
@@ -280,7 +280,7 @@ function LogRow({
               ${cost.toFixed(4)}
             </span>
           ) : (
-            <span className="text-muted-foreground/50">—</span>
+            <span className="text-muted-foreground/50"> - </span>
           )}
         </td>
         <td className="px-4 py-3 text-right align-middle whitespace-nowrap">

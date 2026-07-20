@@ -7,7 +7,7 @@ export type UploadedImage = {
   id: string;
   name: string;
   size: number;
-  /** Full data URL — `data:image/png;base64,...` */
+  /** Full data URL - `data:image/png;base64,...` */
   dataUrl: string;
   /** Just the base64 payload, without the `data:...,` prefix. */
   base64: string;

@@ -1,4 +1,4 @@
-// Server-side only — import from server components, route handlers, or
+// Server-side only - import from server components, route handlers, or
 // sitemap/metadata code. Never import into client components: it reads
 // process.env.SWARMS_API_KEY.
 import {

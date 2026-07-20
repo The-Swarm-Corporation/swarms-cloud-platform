@@ -390,7 +390,7 @@ export function ModelDetailClient({ modelId }: { modelId: string }) {
             >
               <p className="text-sm text-muted-foreground mb-3">
                 This page is also available as a plain Markdown file, no
-                HTML parsing required — handy for pasting into an LLM or
+                HTML parsing required - handy for pasting into an LLM or
                 letting an agent fetch it directly.
               </p>
               <div className="relative">

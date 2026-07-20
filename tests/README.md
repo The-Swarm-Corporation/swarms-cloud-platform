@@ -6,7 +6,7 @@ never ships in a production bundle.
 ```
 tests/
 ├── global-setup.ts  Loads .env into process.env
-├── e2e/             Browser flows — drives Chromium as a real user
+├── e2e/             Browser flows - drives Chromium as a real user
 ├── api/             HTTP tests against the Next.js /api/* routes
 └── README.md
 ```
@@ -26,7 +26,7 @@ pnpm test:e2e         # only browser flows
 pnpm test:api         # only HTTP tests
 
 # Tools
-pnpm test:ui          # Playwright UI mode — pick and replay tests
+pnpm test:ui          # Playwright UI mode - pick and replay tests
 pnpm test:report      # open the last HTML report
 ```
 
@@ -39,7 +39,7 @@ doesn't shadow a real shell value. The loader prints a one-line summary
 at startup:
 
 ```
-[playwright] env loaded — .env: 4, SWARMS_API_KEY: present
+[playwright] env loaded - .env: 4, SWARMS_API_KEY: present
 ```
 
 The two API suites that talk to the live Swarms API
@@ -56,7 +56,7 @@ PLAYWRIGHT_USE_BUILD=1 pnpm test
 This runs `next build && next start` instead of `next dev`. Two practical
 differences:
 
-- **Cache headers test** is stricter — it asserts the second consecutive
+- **Cache headers test** is stricter - it asserts the second consecutive
   request to a cached endpoint returns `X-Cache: HIT`. In `next dev`,
   HMR can re-evaluate route modules between requests and drop the
   in-memory cache, so dev-mode runs only verify that the header is
@@ -91,12 +91,12 @@ parallelism while debugging.
   store so the API-key gate doesn't block navigation tests.
 - **`api/`** uses Playwright's `request` fixture to hit `/api/*` routes
   directly. No browser, much faster. Split into:
-  - `auth.spec.ts` — every protected route 401s without `x-api-key`.
-  - `validation.spec.ts` — POST routes 400 on malformed input, never
+  - `auth.spec.ts` - every protected route 401s without `x-api-key`.
+  - `validation.spec.ts` - POST routes 400 on malformed input, never
     reaching upstream.
-  - `cache-headers.spec.ts` — `X-Cache`, `X-Cache-Expires-In`, and
+  - `cache-headers.spec.ts` - `X-Cache`, `X-Cache-Expires-In`, and
     `?refresh=1` behavior. Requires a key, runs serially.
-  - `integration.spec.ts` — live happy paths for read-only endpoints.
+  - `integration.spec.ts` - live happy paths for read-only endpoints.
     Requires a key. Intentionally skips paid POST endpoints.
 
 ## Artifacts
@@ -112,7 +112,7 @@ pnpm test:report
 ## Troubleshooting
 
 **`ERR_CONNECTION_REFUSED` on every navigation test.** Your `pnpm dev`
-server died — usually after a Ctrl-C of an earlier test run leaked a
+server died - usually after a Ctrl-C of an earlier test run leaked a
 half-killed process. Stop any orphan processes and re-run:
 
 ```bash
@@ -124,5 +124,5 @@ pkill -f 'next-server\|next dev' ; pnpm test
 
 **Integration tests all skip.** The env loader didn't find a
 non-empty `SWARMS_API_KEY` in `.env`. Check the
-`[playwright] env loaded …` line at the top of the run output — it
+`[playwright] env loaded …` line at the top of the run output - it
 reports presence without leaking the value.

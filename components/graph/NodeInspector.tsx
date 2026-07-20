@@ -65,7 +65,7 @@ export function NodeInspector({
           />
           {duplicateName && (
             <span className="text-[11px] text-danger">
-              Name must be unique — it identifies this node in the graph.
+              Name must be unique - it identifies this node in the graph.
             </span>
           )}
         </Field>
@@ -374,7 +374,7 @@ function Toggle({
 }
 
 /**
- * JSON editor with local draft state — commits the parsed object on blur so the
+ * JSON editor with local draft state - commits the parsed object on blur so the
  * user can type freely without each keystroke being parsed. Seeded once from the
  * spec (the inspector is remounted per node via a React key).
  */

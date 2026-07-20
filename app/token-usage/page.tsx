@@ -39,7 +39,7 @@ interface UsageResponse {
   truncated: boolean;
 }
 
-// Validated categorical palette (dataviz reference instance) — fixed slot
+// Validated categorical palette (dataviz reference instance) - fixed slot
 // order, dark steps selected for the dark surface, never cycled past 8.
 const VIZ_STYLE = `
 .usage-viz {
@@ -400,7 +400,7 @@ export default function TokenUsagePage() {
               </h1>
               <p className="text-sm text-muted-foreground max-w-2xl">
                 Input and output tokens across your completions, by day, week, or
-                month — filter by API key and agent.
+                month - filter by API key and agent.
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -428,7 +428,7 @@ export default function TokenUsagePage() {
             </div>
           </div>
 
-          {/* Filter row — scopes everything below it */}
+          {/* Filter row - scopes everything below it */}
           <div className="flex items-center gap-2 flex-wrap mb-6">
             <div
               className="inline-flex items-center h-8 rounded-md border border-border bg-card p-0.5"
@@ -461,7 +461,7 @@ export default function TokenUsagePage() {
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
               <span className="px-1.5 text-xs font-medium text-foreground whitespace-nowrap min-w-[104px] text-center tabular-nums">
-                {anchor ? periodLabel(anchor, view) : '—'}
+                {anchor ? periodLabel(anchor, view) : ' - '}
               </span>
               <button
                 type="button"
@@ -578,7 +578,7 @@ export default function TokenUsagePage() {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Completions only
                     {data.truncated &&
-                      ' — showing the first 20,000 logs of this period'}
+                      ' - showing the first 20,000 logs of this period'}
                   </p>
                 </div>
 
@@ -656,7 +656,7 @@ export default function TokenUsagePage() {
                   />
                 )}
 
-                {/* Legend — only for 2+ series */}
+                {/* Legend - only for 2+ series */}
                 {series.length > 1 && hasData && (
                   <div className="flex items-center gap-4 flex-wrap mt-4 pt-4 border-t border-border">
                     {series.map((s) => (

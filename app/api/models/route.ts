@@ -16,7 +16,7 @@ const cache = new Map<string, CacheEntry>();
 /**
  * Whether an upstream failure is worth one retry. Covers 5xx/network errors
  * and the key-verification service's transient hiccup, which surfaces as a
- * 403 whose message says "unexpected error ... try again" — distinct from a
+ * 403 whose message says "unexpected error ... try again" - distinct from a
  * definitive invalid/expired-key rejection.
  */
 function isTransientUpstreamError(error: unknown): boolean {

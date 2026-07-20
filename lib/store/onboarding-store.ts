@@ -39,7 +39,7 @@ interface OnboardingStore {
   start: () => void;
   /** Re-run the tour from the beginning (settings → "Restart tour"). */
   restart: () => void;
-  /** Advance forward only — late signals can never move the flow backwards. */
+  /** Advance forward only - late signals can never move the flow backwards. */
   advance: (step: OnboardingStep) => void;
   markWelcomeSeen: () => void;
   dismiss: () => void;

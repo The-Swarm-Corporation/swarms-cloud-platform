@@ -196,7 +196,7 @@ export default function HistoryPage() {
 
           {!(isLoading && logs.length === 0) && (
             <div className="mb-5 pb-4 border-b border-border flex flex-col gap-2.5">
-              {/* Row 1 — search + actions */}
+              {/* Row 1 - search + actions */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <SearchBar
                   value={searchQuery}
@@ -233,7 +233,7 @@ export default function HistoryPage() {
                 </div>
               </div>
 
-              {/* Row 2 — date filter */}
+              {/* Row 2 - date filter */}
               <div className="flex flex-wrap items-center gap-2">
                 <div
                   role="radiogroup"

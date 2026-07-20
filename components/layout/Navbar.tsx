@@ -120,7 +120,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 flex-shrink-0 w-full bg-background">
-      {/* Row 1 — utility bar (logo, workspace, theme, outputs) */}
+      {/* Row 1 - utility bar (logo, workspace, theme, outputs) */}
       <div
         className="bg-subtle border-b border-border"
         style={{
@@ -174,7 +174,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Row 2 — tab strip (AWS-style underline-active) */}
+      {/* Row 2 - tab strip (AWS-style underline-active) */}
       <nav
         className="relative bg-background border-b border-border"
         style={{

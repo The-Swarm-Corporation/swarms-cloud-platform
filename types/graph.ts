@@ -2,7 +2,7 @@
 // Agents are nodes; edges define the directed flow of execution between them.
 
 // Full agent schema accepted by the Swarms API (AgentSpec). model_name is a
-// free-form string — any model id the platform supports is valid.
+// free-form string - any model id the platform supports is valid.
 export interface GraphAgentSpec {
   agent_name: string;
   description?: string;

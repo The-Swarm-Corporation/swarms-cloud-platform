@@ -99,7 +99,7 @@ export default function AppsDirectoryPage() {
                 Apps
               </h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Every page, tool, and product in Swarms Cloud — grouped by
+                Every page, tool, and product in Swarms Cloud - grouped by
                 purpose. Press{' '}
                 <kbd className="inline-flex items-center align-middle px-1.5 h-5 rounded border border-border bg-subtle text-[11px] font-mono text-muted-foreground">
                   ⌘K

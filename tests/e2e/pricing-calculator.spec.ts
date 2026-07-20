@@ -2,7 +2,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
 import { seedApiKey } from './_helpers';
 
 /**
- * Pricing-calculator fields aren't programmatically labeled — the <label>
+ * Pricing-calculator fields aren't programmatically labeled - the <label>
  * is a sibling of the <input>, not for=-linked. Walk from the label text
  * to the next sibling input directly.
  */

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
  * `true` after mount. Use this to gate any render that reads from a
  * zustand-persisted store (or anything else backed by localStorage) so that
  * the server's empty snapshot and the client's hydrated snapshot agree on
- * the first paint — which prevents React hydration mismatches (error #418).
+ * the first paint - which prevents React hydration mismatches (error #418).
  *
  * Pattern:
  *   const fromStore = useAgentStore((s) => s.agents);

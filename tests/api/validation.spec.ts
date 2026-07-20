@@ -36,7 +36,7 @@ test.describe('API input validation', () => {
       data: 'not json' as unknown as object,
     });
     // Either the JSON parser hits an error (400) or the body is the
-    // string-coerced version — both are explicit failures, not 500.
+    // string-coerced version - both are explicit failures, not 500.
     expect([400, 422]).toContain(res.status());
   });
 

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * Design tokens — Vercel/Geist-inspired.
+ * Design tokens - Vercel/Geist-inspired.
  * CSS vars hold raw "R G B" triplets so Tailwind's `bg-foo/50` opacity syntax works
  * via `rgb(var(--token) / <alpha-value>)` defined in tailwind.config.ts.
  */

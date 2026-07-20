@@ -9,9 +9,9 @@ import { JsonLd } from '@/components/seo/JsonLd';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Workbench — Build, Configure & Run AI Agents',
+  title: 'Workbench - Build, Configure & Run AI Agents',
   description:
-    'Build, configure, and run AI agents on Swarms Cloud. Tune model, system prompt, temperature, and tools, then execute against the production Swarms API in one click — an IDE for autonomous agents.',
+    'Build, configure, and run AI agents on Swarms Cloud. Tune model, system prompt, temperature, and tools, then execute against the production Swarms API in one click - an IDE for autonomous agents.',
   path: '/workbench',
   keywords: [
     'agent workbench',

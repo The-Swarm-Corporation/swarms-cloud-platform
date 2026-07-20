@@ -108,7 +108,7 @@ export default function DashboardPage() {
             />
             <MetricsCard
               title="Credit balance"
-              value={credits ? `$${credits.total_credits.toFixed(2)}` : '—'}
+              value={credits ? `$${credits.total_credits.toFixed(2)}` : ' - '}
               icon={Wallet}
               subtitle={
                 credits

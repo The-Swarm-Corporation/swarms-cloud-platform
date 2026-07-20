@@ -16,7 +16,7 @@ const cache = new Map<string, CacheEntry>();
 
 // A brand-new account has no upstream credits record yet, so the Swarms API
 // answers GET /v1/account/credits with 404 "user credits not found". That is a
-// normal empty state, not a failure — represent it as a zero balance so the
+// normal empty state, not a failure - represent it as a zero balance so the
 // dashboard and settings render instead of erroring. Without this the credits
 // hook (which re-polls every 30s) turns one missing record into a stream of
 // console 404s for every new user. See issue #65.

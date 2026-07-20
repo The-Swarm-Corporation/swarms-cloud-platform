@@ -8,7 +8,7 @@ const STORAGE_KEY = 'ui-store';
 
 /**
  * Synchronous script injected into <head> by the root layout so the correct
- * theme class is applied before first paint — eliminates the dark→light flash.
+ * theme class is applied before first paint - eliminates the dark→light flash.
  * Reads the persisted Zustand store directly.
  */
 export const themeInitScript = `(() => {

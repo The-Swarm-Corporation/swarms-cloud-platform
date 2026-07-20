@@ -52,7 +52,7 @@ export function ExecutionHistoryPreview({
         </div>
       ) : recent.length === 0 ? (
         <p className="text-xs text-muted-foreground py-8 text-center">
-          No executions yet — runs will appear here.
+          No executions yet - runs will appear here.
         </p>
       ) : (
         <ul className="divide-y divide-border -mx-1">
@@ -108,9 +108,9 @@ export function ExecutionHistoryPreview({
 }
 
 function formatRelative(timestamp: string | null): string {
-  if (!timestamp) return '—';
+  if (!timestamp) return ' - ';
   const t = new Date(timestamp).getTime();
-  if (!Number.isFinite(t)) return '—';
+  if (!Number.isFinite(t)) return ' - ';
   const diff = Date.now() - t;
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return 'now';

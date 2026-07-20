@@ -400,7 +400,7 @@ export default function TokenUsagePage() {
               </h1>
               <p className="text-sm text-muted-foreground max-w-2xl">
                 Input and output tokens across your completions, by day, week, or
-                month — filter by API key and agent.
+                month. Filter by API key and agent.
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -578,7 +578,7 @@ export default function TokenUsagePage() {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Completions only
                     {data.truncated &&
-                      ' — showing the first 20,000 logs of this period'}
+                      ' (showing the first 20,000 logs of this period)'}
                   </p>
                 </div>
 

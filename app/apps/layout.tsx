@@ -3,9 +3,9 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Apps — Every Tool on the Multi-Agent AI Platform',
+  title: 'Apps, Every Tool on the Multi-Agent AI Platform',
   description:
-    'A directory of every page, tool, and product in Swarms Cloud, grouped by purpose with full-text search — agent workbench, swarm playground, workflow builder, prompt generator, model catalog, and more.',
+    'A directory of every page, tool, and product in Swarms Cloud, grouped by purpose with full-text search, agent workbench, swarm playground, workflow builder, prompt generator, model catalog, and more.',
   path: '/apps',
   keywords: [
     'apps directory',

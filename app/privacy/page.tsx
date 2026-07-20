@@ -33,20 +33,20 @@ const SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
         <p>We collect the following categories of information:</p>
         <ul className="list-disc pl-5 space-y-1.5 mt-2">
           <li>
-            <span className="text-foreground">Account information</span> — email
+            <span className="text-foreground">Account information</span>, email
             address, API keys, and billing details you provide when registering.
           </li>
           <li>
-            <span className="text-foreground">Usage data</span> — agent
+            <span className="text-foreground">Usage data</span>, agent
             configurations, swarm executions, logs, token counts, and timestamps
             generated through normal use of the Service.
           </li>
           <li>
-            <span className="text-foreground">Content</span> — task prompts,
+            <span className="text-foreground">Content</span>, task prompts,
             tool calls, and model outputs that pass through the Service.
           </li>
           <li>
-            <span className="text-foreground">Technical data</span> — browser
+            <span className="text-foreground">Technical data</span>, browser
             user agent, IP address, device identifiers, and diagnostic logs.
           </li>
         </ul>

@@ -192,7 +192,7 @@ export default function ComparePage() {
             </p>
           </div>
 
-          {/* Task + run — the primary action lives right under the input,
+          {/* Task + run, the primary action lives right under the input,
               not buried below the agent columns. */}
           <section className="rounded-lg border border-border bg-card p-4 sm:p-5 mb-5 space-y-3">
             <Textarea

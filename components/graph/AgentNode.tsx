@@ -7,7 +7,7 @@ import type { AgentFlowNode } from '@/lib/graph/build';
 
 /**
  * Custom graph node representing one agent. The left handle is the target
- * (incoming work), the right handle is the source (outgoing work) — matching
+ * (incoming work), the right handle is the source (outgoing work), matching
  * the left-to-right reading direction of the workflow.
  */
 export function AgentNode({ data, selected }: NodeProps<AgentFlowNode>) {

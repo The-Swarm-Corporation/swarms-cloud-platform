@@ -65,7 +65,7 @@ export default function AgentsPage() {
     [configs],
   );
 
-  // Distinct models actually present in the user's agents — drives the model
+  // Distinct models actually present in the user's agents, drives the model
   // dropdown so we don't show models they don't use.
   const availableModels = useMemo(() => {
     const set = new Set<string>();
@@ -199,10 +199,10 @@ export default function AgentsPage() {
             )}
           </div>
 
-          {/* Toolbar — only render when there's something to search */}
+          {/* Toolbar, only render when there's something to search */}
           {!(isLoading && agents.length === 0) && agents.length > 0 && (
             <div className="mb-5 pb-4 border-b border-border flex flex-col gap-2.5">
-              {/* Row 1 — Search + primary actions */}
+              {/* Row 1, Search + primary actions */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <SearchBar
                   value={searchQuery}
@@ -251,7 +251,7 @@ export default function AgentsPage() {
                 </div>
               </div>
 
-              {/* Row 2 — Filters */}
+              {/* Row 2, Filters */}
               <div className="flex flex-wrap items-center gap-2">
                 <FilterSelect
                   label="Model"

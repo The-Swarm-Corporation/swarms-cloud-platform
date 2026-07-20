@@ -43,7 +43,7 @@ export function BillingSection() {
     try {
       await apiFetch('/api/billing/sync', { method: 'POST' });
     } catch {
-      // ignore — refetch still reflects the last known state
+      // ignore, refetch still reflects the last known state
     }
     await refetch();
     setSyncing(false);
@@ -333,7 +333,7 @@ export function BillingSection() {
           <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
             {getPlan(data?.plan)
               ? 'Your membership is active. Enjoy higher limits, priority compute, and premium features.'
-              : 'Payment received. Your plan is being activated — this can take a few seconds.'}
+              : 'Payment received. Your plan is being activated, this can take a few seconds.'}
           </p>
           <button
             type="button"

@@ -3,7 +3,7 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Prompt Generator — Production-Grade System Prompts',
+  title: 'Prompt Generator, Production-Grade System Prompts',
   description:
     'Auto-generate production-grade system prompts for AI agents on Swarms Cloud. The specialized Prompt Architect agent turns a one-line brief into a drop-in deployable system prompt in seconds.',
   path: '/prompts',

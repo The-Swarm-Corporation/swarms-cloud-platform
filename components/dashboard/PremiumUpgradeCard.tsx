@@ -32,7 +32,7 @@ type Variant = {
   benefits: Benefit[];
 };
 
-// Shown to Premium users — upsell to the Enterprise offering.
+// Shown to Premium users, upsell to the Enterprise offering.
 const ENTERPRISE_VARIANT: Variant = {
   badgeIcon: Building2,
   badgeLabel: 'Swarms Enterprise',
@@ -68,7 +68,7 @@ const ENTERPRISE_VARIANT: Variant = {
   ],
 };
 
-// Shown to Pro users — upsell to Premium, framing the Pro → Premium jump.
+// Shown to Pro users, upsell to Premium, framing the Pro → Premium jump.
 const PREMIUM_PRO_VARIANT: Variant = {
   badgeIcon: Crown,
   badgeLabel: 'Swarms Premium',
@@ -84,7 +84,7 @@ const PREMIUM_PRO_VARIANT: Variant = {
     {
       icon: Zap,
       title: 'More rate limits',
-      description: 'The highest request ceilings on the platform — scale without throttling.',
+      description: 'The highest request ceilings on the platform, scale without throttling.',
     },
     {
       icon: Cpu,
@@ -99,7 +99,7 @@ const PREMIUM_PRO_VARIANT: Variant = {
   ],
 };
 
-// Shown to free-tier users — upsell to Premium.
+// Shown to free-tier users, upsell to Premium.
 const PREMIUM_DEFAULT_VARIANT: Variant = {
   badgeIcon: Crown,
   badgeLabel: 'Swarms Premium',
@@ -120,7 +120,7 @@ const PREMIUM_DEFAULT_VARIANT: Variant = {
     {
       icon: Shield,
       title: 'Priority compute',
-      description: 'Dedicated lane during peak traffic — no queueing.',
+      description: 'Dedicated lane during peak traffic, no queueing.',
     },
     {
       icon: Headphones,

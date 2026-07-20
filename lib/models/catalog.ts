@@ -499,7 +499,7 @@ export function modelKeywords(modelId: string): string[] {
 
 /** SERP title for a model page (brand suffix added by buildMetadata). */
 export function modelSeoTitle(modelId: string): string {
-  return `${displayModelName(modelId)} API — Agents, Quickstart & Examples`;
+  return `${displayModelName(modelId)} API, Agents, Quickstart & Examples`;
 }
 
 /**

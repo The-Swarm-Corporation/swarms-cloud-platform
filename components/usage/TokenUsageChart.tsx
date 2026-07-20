@@ -149,7 +149,7 @@ export function TokenUsageChart({ buckets, series, formatValue }: TokenUsageChar
           {buckets.map((bucket, bi) => {
             const x = bi * slotW + (slotW - barW) / 2;
             let cumulative = 0;
-            // Index of the last series with a visible value — gets the rounded top.
+            // Index of the last series with a visible value, gets the rounded top.
             let topIdx = -1;
             bucket.values.forEach((v, si) => {
               if (v > 0) topIdx = si;
@@ -198,7 +198,7 @@ export function TokenUsageChart({ buckets, series, formatValue }: TokenUsageChar
             ) : null,
           )}
 
-          {/* Hit targets — full-height slot per bucket */}
+          {/* Hit targets, full-height slot per bucket */}
           {buckets.map((_, bi) => (
             <rect
               key={bi}
@@ -216,7 +216,7 @@ export function TokenUsageChart({ buckets, series, formatValue }: TokenUsageChar
         </g>
       </svg>
 
-      {/* Tooltip — every series at the hovered X */}
+      {/* Tooltip, every series at the hovered X */}
       {hoveredBucket && (
         <div
           className="pointer-events-none absolute z-10 min-w-[180px] rounded-md border border-border bg-card px-3 py-2 shadow-lg"

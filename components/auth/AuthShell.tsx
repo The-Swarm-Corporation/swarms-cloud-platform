@@ -10,7 +10,7 @@ interface AuthShellProps {
 export function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="min-h-screen min-h-[100dvh] w-full flex bg-background text-foreground">
-      {/* Left — form column */}
+      {/* Left, form column */}
       <div className="relative flex flex-col w-full lg:w-1/2 min-h-screen min-h-[100dvh] px-6 sm:px-10 lg:px-14 py-6">
         {/* Top-left logo */}
         <div className="flex items-center justify-between">
@@ -56,7 +56,7 @@ export function AuthShell({ children }: AuthShellProps) {
         </p>
       </div>
 
-      {/* Right — hero panel */}
+      {/* Right, hero panel */}
       <aside
         className="relative hidden lg:flex w-1/2 items-center justify-center overflow-hidden"
         aria-hidden="true"

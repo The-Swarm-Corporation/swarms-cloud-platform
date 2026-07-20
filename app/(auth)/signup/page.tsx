@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Sign up — Start Building Multi-Agent AI Free',
+  title: 'Sign up, Start Building Multi-Agent AI Free',
   description:
     'Create a free Swarms Cloud account and start building, deploying, and scaling AI agents and multi-agent swarms in minutes. Free credits included.',
   path: '/signup',

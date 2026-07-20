@@ -43,7 +43,7 @@ export default function RateLimitsPage() {
                 Rate limits
               </h1>
               <p className="text-sm text-muted-foreground max-w-2xl">
-                Live usage across your minute, hour, and day windows — and exactly
+                Live usage across your minute, hour, and day windows, and exactly
                 when each one resets.
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function RateLimitsPage() {
                     <span className="text-xs text-muted-foreground leading-relaxed">
                       Free, Pro, and Premium tiers each raise the ceiling on all
                       three windows and on tokens per agent. Upgrading applies
-                      immediately — no redeploy needed.
+                      immediately, no redeploy needed.
                     </span>
                   </li>
                 </ul>
@@ -204,8 +204,8 @@ export default function RateLimitsPage() {
                         </h2>
                       </div>
                       <p className="text-sm text-muted-foreground max-w-lg">
-                        Upgrade to raise all three rate-limit windows — up to 10×
-                        more requests per minute and 50× more per day — plus
+                        Upgrade to raise all three rate-limit windows, up to 10×
+                        more requests per minute and 50× more per day, plus
                         priority compute during peak traffic.
                       </p>
                     </div>

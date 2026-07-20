@@ -53,8 +53,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
-    template: `%s — ${SITE.name}`,
+    default: `${SITE.name}, ${SITE.tagline}`,
+    template: `%s, ${SITE.name}`,
   },
   description: SITE.description,
   applicationName: SITE.name,
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     type: 'website',
     url: SITE.url,
     siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: `${SITE.name}, ${SITE.tagline}`,
     description: SITE.description,
     locale: SITE.locale,
     images: [
@@ -99,7 +99,7 @@ export const metadata: Metadata = {
         url: `${SITE.url}${SITE.ogImage}`,
         width: 1200,
         height: 630,
-        alt: `${SITE.name} — ${SITE.tagline}`,
+        alt: `${SITE.name}, ${SITE.tagline}`,
       },
     ],
   },
@@ -107,7 +107,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: SITE.twitter,
     creator: SITE.twitter,
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: `${SITE.name}, ${SITE.tagline}`,
     description: SITE.description,
     images: [`${SITE.url}${SITE.ogImage}`],
   },

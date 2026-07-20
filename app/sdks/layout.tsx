@@ -3,7 +3,7 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'SDKs — Python, TypeScript, Go, Java & C# Clients',
+  title: 'SDKs, Python, TypeScript, Go, Java & C# Clients',
   description:
     'Build with the Swarms API in any language. Official, typed client libraries for Python, TypeScript, Go, Java, and C#, plus a Model Context Protocol server for Claude Desktop and Cursor.',
   path: '/sdks',

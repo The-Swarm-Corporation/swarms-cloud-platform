@@ -3,7 +3,7 @@ import { buildMetadata, pageBreadcrumbJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Workflow Builder — Visual Drag & Drop Multi-Agent Workflows',
+  title: 'Workflow Builder | Visual Drag & Drop Multi-Agent Workflows',
   description:
     'Visually build multi-agent workflows on Swarms Cloud. Drag agents onto a canvas, connect them into a directed flow, then run it on the platform or export the request as Python, TypeScript, Go, or cURL.',
   path: '/workflow-builder',

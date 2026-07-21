@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = buildMetadata({
-  title: 'The Swarms Cloud — Multi-Agent AI Platform',
+  title: 'The Swarms Cloud | Multi-Agent AI Platform',
   description:
     'Build, deploy, and scale multi-agent AI systems with Swarms Cloud. Orchestrate 16 swarm architectures, reasoning agents, and batch workflows through an OpenAI-compatible API. Join 7M+ developers using Swarms.',
   path: '/learn-more',
@@ -74,7 +74,7 @@ const CAPABILITIES = [
     icon: Network,
     title: 'Agents & swarms',
     description:
-      'Run single agents or orchestrate full swarms — hierarchical, parallel, and collaborative workflows — through one completion API. Batch endpoints handle fleets in a single call.',
+      'Run single agents or orchestrate full swarms. Hierarchical, parallel, and collaborative workflows run through one completion API, and batch endpoints handle fleets in a single call.',
   },
   {
     icon: FlaskConical,
@@ -123,7 +123,7 @@ const ARCHITECTURES = [
   },
   {
     name: 'Graph Workflow',
-    description: 'Agents connected as a DAG — work flows along the edges you define.',
+    description: 'Agents connected as a DAG. Work flows along the edges you define.',
   },
   {
     name: 'Mixture of Agents',
@@ -163,7 +163,7 @@ const ARCHITECTURES = [
   },
   {
     name: 'Heavy Swarm',
-    description: 'Heavy reasoning swarm — slow but thorough.',
+    description: 'Heavy reasoning swarm. Slow but thorough.',
   },
   {
     name: 'Batched Grid Workflow',
@@ -180,7 +180,7 @@ const CONSOLE_FEATURES = [
     icon: Hammer,
     title: 'Workbench',
     description:
-      'Author single agents — model, prompt, temperature, tools — and execute them against the production API in one click.',
+      'Author single agents. Set the model, prompt, temperature, and tools, then execute them against the production API in one click.',
   },
   {
     icon: Sparkles,
@@ -204,7 +204,7 @@ const CONSOLE_FEATURES = [
     icon: Cpu,
     title: 'Model catalog',
     description:
-      'A live catalog of frontier models — GPT, Claude, Gemini, Llama, and more — usable by any agent in any swarm.',
+      'A live catalog of frontier models, including GPT, Claude, Gemini, Llama, and more, usable by any agent in any swarm.',
   },
   {
     icon: Wand2,
@@ -220,7 +220,7 @@ const WORKFLOW_STEPS = [
     icon: Boxes,
     title: 'Define your agents',
     description:
-      'Give each agent a name, model, and system prompt in the Workbench — or auto-generate prompts. Each agent can use a different model, so capability matches the role.',
+      'Give each agent a name, model, and system prompt in the Workbench, or auto-generate prompts. Each agent can use a different model, so capability matches the role.',
   },
   {
     step: '02',
@@ -234,7 +234,7 @@ const WORKFLOW_STEPS = [
     icon: Zap,
     title: 'Deploy and manage',
     description:
-      'Ship through one production API call. Track every execution, token, and dollar in the console — with full history for audits and debugging.',
+      'Ship through one production API call. Track every execution, token, and dollar in the console, with full history for audits and debugging.',
   },
 ];
 
@@ -255,7 +255,7 @@ const ENTERPRISE_FEATURES = [
     icon: History,
     title: 'Audit-ready history',
     description:
-      'Complete execution logs with timestamps, token counts, and per-run cost — retained per your plan and deletable by you at any time.',
+      'Complete execution logs with timestamps, token counts, and per-run cost. Logs are retained per your plan and deletable by you at any time.',
   },
   {
     icon: KeyRound,
@@ -273,7 +273,7 @@ const ENTERPRISE_FEATURES = [
     icon: Layers,
     title: 'Batch at scale',
     description:
-      'Batch completions for agents, swarms, and research sessions — with scheduling patterns for cron and Airflow pipelines.',
+      'Batch completions for agents, swarms, and research sessions, with scheduling patterns for cron and Airflow pipelines.',
   },
 ];
 
@@ -295,7 +295,7 @@ const FAQS = [
   {
     question: 'How is it different from calling a model API directly?',
     answer:
-      'Swarms Cloud adds orchestration and management on top of raw model calls: 16 multi-agent architectures, automatic swarm construction, batch operations, tool integrations (MCP, web search), and execution history with rate-limit telemetry — all through an OpenAI-compatible endpoint.',
+      'Swarms Cloud adds orchestration and management on top of raw model calls: 16 multi-agent architectures, automatic swarm construction, batch operations, tool integrations (MCP, web search), and execution history with rate-limit telemetry, all through an OpenAI-compatible endpoint.',
   },
   {
     question: 'Which models can my agents use?',
@@ -516,7 +516,7 @@ export default async function LearnMorePage() {
             <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Build, deploy, and manage fleets of AI agents from one place.
               Hierarchical, parallel, and collaborative workflows run on a
-              high-efficiency runtime optimized for concurrency — with full
+              high-efficiency runtime optimized for concurrency, with full
               observability over every execution, token, and dollar.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -566,7 +566,7 @@ export default async function LearnMorePage() {
                 dashboards that were never built for AI workloads. The Swarms
                 Cloud replaces that patchwork with a single system: a
                 production API with 20+ endpoints for agents, swarms, deep
-                research, and reasoning — and a management console that shows
+                research, and reasoning, with a management console that shows
                 you exactly what your fleet is doing and what it costs.
               </p>
               <ul className="mt-6 space-y-2.5">
@@ -617,7 +617,7 @@ export default async function LearnMorePage() {
             <SectionHeading
               eyebrow="Capabilities"
               title="Everything an agent fleet needs, behind one API"
-              subtitle="From a single completion to batched research sessions — every capability is a first-class endpoint."
+              subtitle="From a single completion to batched research sessions, every capability is a first-class endpoint."
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {CAPABILITIES.map((feature) => (
@@ -645,7 +645,7 @@ export default async function LearnMorePage() {
           <SectionHeading
             eyebrow="Architectures"
             title="16 swarm architectures, zero orchestration code"
-            subtitle="Every coordination pattern your team would otherwise hand-build — hierarchies, debates, councils, routers — available as a single API parameter."
+              subtitle="Every coordination pattern your team would otherwise hand-build, from hierarchies and debates to councils and routers, available as a single API parameter."
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {ARCHITECTURES.map((arch) => (
@@ -682,7 +682,7 @@ export default async function LearnMorePage() {
             <SectionHeading
               eyebrow="Management console"
               title="See and steer everything your agents do"
-              subtitle="The console is mission control for your fleet — build, run, watch, and audit without leaving the browser."
+              subtitle="The console is mission control for your fleet. Build, run, watch, and audit without leaving the browser."
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {CONSOLE_FEATURES.map((feature) => (
@@ -740,7 +740,7 @@ export default async function LearnMorePage() {
             <SectionHeading
               eyebrow="Enterprise"
               title="Built for teams that ship to production"
-              subtitle="Run agents with the same operational rigor as the rest of your stack — global, auditable, and predictable."
+              subtitle="Run agents with the same operational rigor as the rest of your stack. Global, auditable, and predictable."
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {ENTERPRISE_FEATURES.map((feature) => (
@@ -773,8 +773,8 @@ export default async function LearnMorePage() {
               </h2>
               <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 Token-based pricing that stays the same no matter which model
-                your agents use. Model your exact workload — tokens, agents,
-                images, and tools — with the interactive calculator.
+                your agents use. Model your exact workload, from tokens and agents
+                to images and tools, with the interactive calculator.
               </p>
               <ul className="mt-5 space-y-2">
                 {[
@@ -823,7 +823,7 @@ export default async function LearnMorePage() {
                     Night mode: 50% off swarm tokens
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Every night, 8 PM–6 AM Pacific — ideal for batch pipelines
+                    Every night, 8 PM–6 AM Pacific, ideal for batch pipelines
                   </p>
                 </div>
               </div>
@@ -905,7 +905,7 @@ export default async function LearnMorePage() {
             </h2>
             <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">
               Join the teams orchestrating production agent fleets on The
-              Swarms Cloud. Create your workspace in minutes — free credits
+              Swarms Cloud. Create your workspace in minutes. Free credits
               included.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

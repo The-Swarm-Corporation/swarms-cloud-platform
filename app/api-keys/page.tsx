@@ -389,7 +389,7 @@ export default function ApiKeysPage() {
         {generatedKey ? (
           <div className="space-y-4">
             <div className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-              Copy your key now — it will not be shown again.
+              Copy your key now. It will not be shown again.
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-foreground">

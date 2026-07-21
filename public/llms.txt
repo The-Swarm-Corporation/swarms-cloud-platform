@@ -1,20 +1,20 @@
-# Swarms Cloud — Multi-Agent AI Platform
+# Swarms Cloud | Multi-Agent AI Platform
 
-> Build, deploy, and scale multi-agent AI systems. Orchestrate 17+ swarm architectures — Hierarchical, Sequential, Concurrent, Mixture-of-Agents, Council, Debate-with-Judge, and more — through an OpenAI-compatible API powered by a Rust agent runtime.
+> Build, deploy, and scale multi-agent AI systems. Orchestrate 17+ swarm architectures, including Hierarchical, Sequential, Concurrent, Mixture-of-Agents, Council, Debate-with-Judge, and more, through an OpenAI-compatible API powered by a Rust agent runtime.
 
 Swarms Cloud is the enterprise-grade platform for building, deploying, and scaling multi-agent AI systems. Manage single agents, reasoning agents, and production swarm workflows from a unified API with full observability, execution history, and transparent rate limits.
 
 ## Getting Started
 
 - [API Documentation](https://docs.swarms.ai): Complete reference for the Swarms Cloud REST API
-- [Python SDK](https://docs.swarms.ai): `pip install swarms` — official Python client
-- [TypeScript SDK](https://docs.swarms.ai): `@swarms/sdk` — for Node, Deno, and edge runtimes
+- [Python SDK](https://docs.swarms.ai): `pip install swarms`, official Python client
+- [TypeScript SDK](https://docs.swarms.ai): `@swarms/sdk`, for Node, Deno, and edge runtimes
 - [Go SDK](https://docs.swarms.ai): Idiomatic Go client for production services
 - [Create an Account](https://swarms.ai/signup): Free workspace with included credits
 
 ## Key Features
 
-- [Agents & Swarms](https://swarms.ai/swarms): 16+ multi-agent coordination patterns — Hierarchical, Sequential, Concurrent, Graph, Mixture-of-Agents, Council, Debate, Router, Majority Voting, Group Chat, and more
+- [Agents & Swarms](https://swarms.ai/swarms): 16+ multi-agent coordination patterns, including Hierarchical, Sequential, Concurrent, Graph, Mixture-of-Agents, Council, Debate, Router, Majority Voting, Group Chat, and more
 - [Reasoning Agents](https://swarms.ai/models): Dedicated completions for step-by-step reasoning tasks
 - [Deep Research](https://swarms.ai/swarms): Research agents that fan out across sources and synthesize findings
 - [Batch Operations](https://swarms.ai/apps): Run agent fleets in a single API call with grid workflows

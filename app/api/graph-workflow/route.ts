@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
   if (new Set(names).size !== names.length) {
     return NextResponse.json(
-      { error: 'Agent names must be unique — they identify nodes in the graph' },
+      { error: 'Agent names must be unique. They identify nodes in the graph.' },
       { status: 400 }
     );
   }

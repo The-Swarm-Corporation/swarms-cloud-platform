@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Model Catalog — GPT, Claude, Gemini, Llama & More',
+  title: 'AI Model Catalog | GPT, Claude, Gemini, Llama & More',
   description:
-    'Browse every AI model available on Swarms Cloud — GPT-4o, Claude Opus and Sonnet, Gemini, Llama, DeepSeek, Qwen, and more — ready to plug into agent and swarm configurations through the Agent Completions API.',
+    'Browse every AI model available on Swarms Cloud, including GPT-4o, Claude Opus and Sonnet, Gemini, Llama, DeepSeek, Qwen, and more, ready to plug into agent and swarm configurations through the Agent Completions API.',
   path: '/models',
   keywords: [
     'AI model catalog',

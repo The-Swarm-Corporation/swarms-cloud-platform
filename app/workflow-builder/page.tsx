@@ -751,7 +751,7 @@ function WorkflowSettings({
           names={endPoints}
         />
         <p className="text-[11px] text-muted-foreground">
-          Derived automatically — nodes with no incoming edge start the flow;
+          Derived automatically. Nodes with no incoming edge start the flow;
           nodes with no outgoing edge end it.
         </p>
       </div>

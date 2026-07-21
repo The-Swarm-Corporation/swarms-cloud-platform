@@ -20,7 +20,7 @@ export const SITE = {
   })(),
   tagline: 'Build, deploy, and scale multi-agent systems for any application.',
   description:
-    'Swarms Cloud is the enterprise-grade platform for building, deploying, and scaling multi-agent AI systems. Orchestrate single agents, reasoning agents, and 17+ multi-agent architectures — Hierarchical, Sequential, Concurrent, Mixture-of-Agents, Council, Debate-with-Judge, and more — through a production-ready, OpenAI-compatible API powered by a Rust agent runtime.',
+    'Swarms Cloud is the enterprise-grade platform for building, deploying, and scaling multi-agent AI systems. Orchestrate single agents, reasoning agents, and 17+ multi-agent architectures, including Hierarchical, Sequential, Concurrent, Mixture-of-Agents, Council, Debate-with-Judge, and more, through a production-ready, OpenAI-compatible API powered by a Rust agent runtime.',
   shortDescription:
     'The cloud for building, deploying, and scaling multi-agent systems.',
   keywords: [
@@ -147,7 +147,7 @@ export const SITE = {
   locale: 'en_US',
 } as const;
 
-const TITLE_SEPARATOR = ' — ';
+const TITLE_SEPARATOR = ' | ';
 
 export type SeoInput = {
   /** Page title (no brand suffix; the template adds it). */

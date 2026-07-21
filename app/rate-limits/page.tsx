@@ -43,7 +43,7 @@ export default function RateLimitsPage() {
                 Rate limits
               </h1>
               <p className="text-sm text-muted-foreground max-w-2xl">
-                Live usage across your minute, hour, and day windows — and exactly
+                Live usage across your minute, hour, and day windows: exactly
                 when each one resets.
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function RateLimitsPage() {
                     <span className="text-xs text-muted-foreground leading-relaxed">
                       Free, Pro, and Premium tiers each raise the ceiling on all
                       three windows and on tokens per agent. Upgrading applies
-                      immediately — no redeploy needed.
+                      immediately, no redeploy needed.
                     </span>
                   </li>
                 </ul>
@@ -204,8 +204,8 @@ export default function RateLimitsPage() {
                         </h2>
                       </div>
                       <p className="text-sm text-muted-foreground max-w-lg">
-                        Upgrade to raise all three rate-limit windows — up to 10×
-                        more requests per minute and 50× more per day — plus
+                        Upgrade to raise all three rate-limit windows (up to 10×
+                        more requests per minute and 50× more per day) plus
                         priority compute during peak traffic.
                       </p>
                     </div>
@@ -296,13 +296,13 @@ function WindowCard({
         <div className="flex items-center justify-between">
           <dt className="text-muted-foreground">Resets in</dt>
           <dd className="tabular-nums font-medium text-foreground">
-            {hydrated ? formatCountdown(resetMs) : '—'}
+            {hydrated ? formatCountdown(resetMs) : '-'}
           </dd>
         </div>
         <div className="flex items-center justify-between">
           <dt className="text-muted-foreground">Resets at</dt>
           <dd className="tabular-nums text-muted-foreground">
-            {hydrated ? resetsAt : '—'}
+            {hydrated ? resetsAt : '-'}
           </dd>
         </div>
       </dl>
@@ -311,7 +311,7 @@ function WindowCard({
 }
 
 function formatCountdown(ms: number): string {
-  if (!Number.isFinite(ms)) return '—';
+  if (!Number.isFinite(ms)) return '-';
   if (ms <= 0) return 'Now';
 
   const totalSeconds = Math.floor(ms / 1000);
